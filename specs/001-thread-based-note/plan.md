@@ -33,7 +33,7 @@ A thread-based note-taking application that enables users to create interconnect
 
 ## Technical Context
 **Language/Version**: TypeScript 5.x / Bun runtime  
-**Primary Dependencies**: Express.js for API, React 18 for UI, Drizzle ORM for database  
+**Primary Dependencies**: Hono for API, React 18 for UI, Drizzle ORM for database  
 **Storage**: SQLite (embedded database, offline-first)  
 **Testing**: Vitest for unit tests, Playwright for E2E tests  
 **Target Platform**: Web application (browser-based)
@@ -49,7 +49,7 @@ A thread-based note-taking application that enables users to create interconnect
 
 **Simplicity**:
 - Projects: 3 (backend, frontend, shared)
-- Using framework directly? Yes (Express, React without wrappers)
+- Using framework directly? Yes (Hono, React without wrappers)
 - Single data model? Yes (shared TypeScript interfaces)
 - Avoiding patterns? No - Using Repository pattern (see Complexity Tracking)
 
@@ -98,7 +98,7 @@ backend/
 ├── src/
 │   ├── models/       # Drizzle ORM schemas
 │   ├── services/     # Business logic with Repository pattern
-│   └── api/          # Express routes
+│   └── api/          # Hono routes and middleware
 └── tests/
     ├── contract/     # OpenAPI contract tests
     ├── integration/  # Feature integration tests

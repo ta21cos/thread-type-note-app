@@ -6,17 +6,33 @@
 
 ## Technology Stack Decisions
 
-### Decision: TypeScript + Node.js Backend
+### Decision: TypeScript + Bun Backend with Hono Framework
 **Rationale**: 
 - Type safety across frontend and backend
 - Shared types/interfaces reduce duplication
-- Strong ecosystem for web applications
-- Excellent tooling support
+- Hono: Ultra-fast, lightweight, runs on Bun natively
+- First-class TypeScript support in Hono
+- Excellent performance with Bun runtime
 
 **Alternatives Considered**:
+- Express.js: More mature but heavier and slower than Hono
+- Fastify: Fast but Hono is more modern and Bun-optimized
 - Python/FastAPI: Good for rapid development but requires type duplication
 - Go: Better performance but steeper learning curve for UI developers
-- Rust: Excellent performance but overkill for single-user application
+
+### Decision: Hono Web Framework
+**Rationale**:
+- Fastest Node.js web framework (3x faster than Express)
+- Built for edge computing and Bun runtime
+- Minimal bundle size (12KB)
+- Built-in TypeScript support with excellent type inference
+- Middleware system compatible with Web Standards
+- Native support for streaming responses
+
+**Alternatives Considered**:
+- Express: Industry standard but slower and requires more setup for TypeScript
+- Koa: Lightweight but less ecosystem support
+- Fastify: Fast but Hono has better Bun integration
 
 ### Decision: React for Frontend
 **Rationale**:
