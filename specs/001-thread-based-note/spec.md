@@ -2,8 +2,8 @@
 
 **Feature Branch**: `001-thread-based-note`  
 **Created**: 2025-09-07  
-**Status**: Draft  
-**Input**: User description: "Thread-based note-taking application where users can create interconnected notes with replies, mentions, and tags, similar to social media threads but for personal knowledge management"
+**Status**: Ready  
+**Input**: User description: "Thread-based note-taking application where users can create interconnected notes with replies, and mentions, similar to social media threads but for personal knowledge management"
 
 ## Execution Flow (main)
 ```
@@ -60,40 +60,53 @@ As a knowledge worker, I want to create notes that can reference and reply to ot
 ### Acceptance Scenarios
 1. **Given** a user has no existing notes, **When** they create their first note, **Then** the note is saved and displayed as a standalone thread
 2. **Given** a user is viewing an existing note, **When** they create a reply to that note, **Then** the reply appears nested under the original note maintaining the thread hierarchy
-3. **Given** a user is composing a note, **When** they type "@" followed by text, **Then** they can select from existing notes to create a mention/reference
-4. **Given** a user is composing a note, **When** they add hashtags, **Then** the tags are recognized and the note becomes findable through those tags
-5. **Given** a user has multiple threaded notes, **When** they click on a mention or tag, **Then** they navigate to the referenced note or see all notes with that tag
+3. **Given** a user has multiple notes, **Then** each note should show has a unique ID
+4. **Given** a user has multiple notes, **When** they add @ + ID to a note, **Then** the note is mentioned in the note with the ID
+6. **Given** a user has multiple threaded notes, **When** they click on a mention or tag, **Then** they navigate to the referenced note or see all notes with that tag
+7. **Given** a user has multiple notes, **When** they search for a note, **Then** they can find it by content, or mentions
+8. **Given** a user has multiple notes, **Then** they can see the latest note at the bottom of the list
+9. **Given** a user has multiple notes, **When** they scroll to the top of the list, **Then** the oldest note is at the top (infinite scroll)
+10. **Given** a user has multiple notes, **When** they clicked on a note, **Then** they can see the note's threads in the right half of the screen
+11. **Given** a user has multiple notes, **When** they delete a note, **Then** the note and all its replies are deleted
+12. **Given** a user has multiple notes, **When** they add a tag to a note, **Then** the note is findable through that tag
+13. **Given** a user has multiple notes, **When** circular references are created, **Then** the system should handle them gracefully
+14. **Given** a user has multiple notes, **When** they search for non-existent note ID, **Then** the system doesn't show any results
+15. **Given** a user is composing a note, **When** they typed very long note, **Then** the note should not be saved
+16. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
+17. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
+18. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
+19. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
+20. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
 
-### Edge Cases
-- What happens when a user deletes a note that has replies? [NEEDS CLARIFICATION: should replies be deleted, orphaned, or promoted?]
-- How does system handle circular references (Note A mentions Note B which mentions Note A)?
-- What happens when searching for non-existent tags or mentions?
-- How does the system handle very long threads? [NEEDS CLARIFICATION: pagination, collapse, or infinite scroll?]
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
-- **FR-001**: System MUST allow users to create text-based notes
+- **FR-001**: System MUST allow users to create text-based (markdown) notes
 - **FR-002**: System MUST enable users to reply to existing notes, creating a thread structure
-- **FR-003**: System MUST support mentions using "@" syntax to reference other notes
-- **FR-004**: System MUST support hashtags for categorizing and organizing notes
-- **FR-005**: Users MUST be able to view notes in a threaded/nested format showing parent-child relationships
-- **FR-006**: System MUST provide search functionality for finding notes by content, tags, or mentions
+- **FR-003**: System MUST support mentions using "@" + note ID syntax to reference other notes
+- **FR-004**: Users MUST be able to view notes in a threaded/nested format showing parent-child relationships
+- **FR-005**: System MUST provide search functionality for finding notes by content, or mentions
 - **FR-007**: Users MUST be able to edit their own notes after creation
 - **FR-008**: Users MUST be able to delete their own notes
-- **FR-009**: System MUST persist all notes and their relationships [NEEDS CLARIFICATION: storage duration and backup requirements?]
+- **FR-009**: System MUST persist all notes and their relationships
 - **FR-010**: System MUST display timestamps for when notes were created and last modified
-- **FR-011**: System MUST handle [NEEDS CLARIFICATION: single user or multi-user system?]
-- **FR-012**: System MUST support [NEEDS CLARIFICATION: maximum note length, thread depth limits?]
-- **FR-013**: Notes MUST support [NEEDS CLARIFICATION: plain text only or rich text/markdown?]
-- **FR-014**: System MUST provide [NEEDS CLARIFICATION: export/import capabilities needed?]
+- **FR-011**: System MUST have unique IDs for each note and enable users to copy them
+- **FR-012**: System MUST enforce maximum note length limits
+- **FR-013**: Notes MUST support markdown formatting
+- **FR-014**: System MUST display notes in split view (list on left, thread on right)
+- **FR-015**: System MUST display notes chronologically (oldest at top, newest at bottom)
+- **FR-016**: System MUST implement infinite scroll for note lists
+- **FR-017**: System MUST cascade delete replies when parent note is deleted
+- **FR-018**: System MUST handle circular references gracefully
+- **FR-019**: System MUST return no results for non-existent note ID searches
+- **FR-020**: System MUST handle system load gracefully with performance degradation
 
 ### Key Entities *(include if feature involves data)*
-- **Note**: Represents a single piece of content that can be standalone or part of a thread. Contains text content, creation timestamp, modification timestamp, author information, and optional parent reference
+- **Note**: Represents a single piece of content that can be standalone or part of a thread. Contains unique ID, markdown text content, creation timestamp, modification timestamp, and optional parent reference
 - **Thread**: A collection of related notes organized hierarchically with parent-child relationships
-- **Tag**: A categorization label prefixed with "#" that can be attached to notes for organization and discovery
-- **Mention**: A reference from one note to another using "@" notation, creating explicit connections between notes
-- **User**: [NEEDS CLARIFICATION: The person creating and managing notes - single user or multiple users with separate spaces?]
+- **Mention**: A reference from one note to another using "@" + ID notation, creating explicit connections between notes
+- **User**: The person creating and managing notes (single-user system)
 
 ---
 
@@ -107,11 +120,11 @@ As a knowledge worker, I want to create notes that can reference and reply to ot
 - [x] All mandatory sections completed
 
 ### Requirement Completeness
-- [ ] No [NEEDS CLARIFICATION] markers remain
-- [ ] Requirements are testable and unambiguous  
+- [x] No [NEEDS CLARIFICATION] markers remain
+- [x] Requirements are testable and unambiguous  
 - [x] Success criteria are measurable
 - [x] Scope is clearly bounded
-- [ ] Dependencies and assumptions identified
+- [x] Dependencies and assumptions identified
 
 ---
 
@@ -124,6 +137,6 @@ As a knowledge worker, I want to create notes that can reference and reply to ot
 - [x] User scenarios defined
 - [x] Requirements generated
 - [x] Entities identified
-- [ ] Review checklist passed (has clarifications needed)
+- [x] Review checklist passed
 
 ---
