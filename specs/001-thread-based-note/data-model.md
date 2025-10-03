@@ -12,7 +12,7 @@ Primary entity representing a single note in the system.
 ```typescript
 interface Note {
   id: string;           // Unique 6-char ID (e.g., "a3k7m9")
-  content: string;      // Markdown text content (max 10KB)
+  content: string;      // Markdown text content (max 1000 chars)
   parentId?: string;    // Reference to parent note (null for root notes)
   createdAt: Date;      // ISO 8601 timestamp
   updatedAt: Date;      // ISO 8601 timestamp
@@ -22,7 +22,7 @@ interface Note {
 
 **Validation Rules**:
 - `id`: Required, unique, 6 characters alphanumeric
-- `content`: Required, 1-10,000 characters, valid markdown
+- `content`: Required, 1-1000 characters, valid markdown
 - `parentId`: Optional, must reference existing note if provided
 - `createdAt`: Required, immutable after creation
 - `updatedAt`: Required, updates on any change
@@ -132,7 +132,7 @@ DRAFT → SAVED → EDITED → DELETED
 
 ### Content Integrity
 - No empty content
-- Maximum size: 10KB per note
+- Maximum size: 1000 characters per note
 - Valid UTF-8 encoding
 - Sanitized markdown (no scripts)
 
@@ -184,7 +184,7 @@ The following SQL will be managed through Drizzle ORM migrations for type safety
 ```sql
 CREATE TABLE notes (
   id TEXT PRIMARY KEY,
-  content TEXT NOT NULL CHECK(length(content) <= 10000),
+  content TEXT NOT NULL CHECK(length(content) BETWEEN 1 AND 1000),
   parentId TEXT REFERENCES notes(id) ON DELETE CASCADE,
   createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

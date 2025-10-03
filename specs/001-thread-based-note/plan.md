@@ -1,6 +1,7 @@
+
 # Implementation Plan: Thread-Based Note-Taking Application
 
-**Branch**: `001-thread-based-note` | **Date**: 2025-09-07 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-thread-based-note` | **Date**: 2025-10-03 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-thread-based-note/spec.md`
 
 ## Execution Flow (/plan command scope)
@@ -8,20 +9,21 @@
 1. Load feature spec from Input path
    → If not found: ERROR "No feature spec at {path}"
 2. Fill Technical Context (scan for NEEDS CLARIFICATION)
-   → Detect Project Type from context (web=frontend+backend, mobile=app+api)
+   → Detect Project Type from file system structure or context (web=frontend+backend, mobile=app+api)
    → Set Structure Decision based on project type
-3. Evaluate Constitution Check section below
+3. Fill the Constitution Check section based on the content of the constitution document.
+4. Evaluate Constitution Check section below
    → If violations exist: Document in Complexity Tracking
    → If no justification possible: ERROR "Simplify approach first"
    → Update Progress Tracking: Initial Constitution Check
-4. Execute Phase 0 → research.md
+5. Execute Phase 0 → research.md
    → If NEEDS CLARIFICATION remain: ERROR "Resolve unknowns"
-5. Execute Phase 1 → contracts, data-model.md, quickstart.md, agent-specific template file (e.g., `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for GitHub Copilot, or `GEMINI.md` for Gemini CLI).
-6. Re-evaluate Constitution Check section
+6. Execute Phase 1 → contracts, data-model.md, quickstart.md, agent-specific template file (e.g., `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for GitHub Copilot, `GEMINI.md` for Gemini CLI, `QWEN.md` for Qwen Code or `AGENTS.md` for opencode).
+7. Re-evaluate Constitution Check section
    → If new violations: Refactor design, return to Phase 1
    → Update Progress Tracking: Post-Design Constitution Check
-7. Plan Phase 2 → Describe task generation approach (DO NOT create tasks.md)
-8. STOP - Ready for /tasks command
+8. Plan Phase 2 → Describe task generation approach (DO NOT create tasks.md)
+9. STOP - Ready for /tasks command
 ```
 
 **IMPORTANT**: The /plan command STOPS at step 7. Phases 2-4 are executed by other commands:
@@ -29,59 +31,35 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-A thread-based note-taking application that enables users to create interconnected notes with replies and mentions (@ID), similar to social media threads but designed for personal knowledge management. The application will support hierarchical note organization, cross-referencing through unique IDs, and markdown formatting.
+Thread-based note-taking application enabling knowledge workers to create interconnected markdown notes with replies and mentions (@ID syntax), organized in conversation-like threads for personal knowledge management. Single-user offline-first web application with split-view UI.
 
 ## Technical Context
-**Language/Version**: TypeScript 5.x / Bun runtime  
-**Primary Dependencies**: Hono for API, React 18 for UI, Drizzle ORM for database  
-**Storage**: SQLite (embedded database, offline-first)  
-**Testing**: Vitest for unit tests, Playwright for E2E tests  
-**Target Platform**: Web application (browser-based)
-**Project Type**: web - frontend + backend structure  
-**Performance Goals**: <100ms response time for note operations, instant search results  
-**Constraints**: Offline-capable, <50MB application size, local data storage  
-**Scale/Scope**: Single-user application, unlimited notes, up to 1000 notes per thread
-**Package Manager**: Bun (faster than npm/yarn/pnpm)
-**ID System**: 6-character alphanumeric IDs for notes
+**Language/Version**: TypeScript 5.x with Bun runtime
+**Primary Dependencies**: React 18 (frontend), Hono (backend), Drizzle ORM, DOMPurify (sanitization)
+**Storage**: SQLite (embedded, offline-first) with full-text search
+**Testing**: Vitest (unit), Playwright (E2E), >80% coverage target
+**Target Platform**: Web browsers (desktop/mobile), offline-capable
+**Project Type**: Web (frontend + backend)
+**Performance Goals**: <200ms response for all operations with up to 1000 notes
+**Constraints**: 1000 character max note length, circular reference prevention, cascade deletion
+**Scale/Scope**: Single-user, support 1000+ notes, split-view UI with infinite scroll
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-**Simplicity**:
-- Projects: 3 (backend, frontend, shared)
-- Using framework directly? Yes (Hono, React without wrappers)
-- Single data model? Yes (shared TypeScript interfaces)
-- Avoiding patterns? No - Using Repository pattern (see Complexity Tracking)
+**Status**: PASS (No constitution file with specific constraints found; following project CLAUDE.md guidelines)
 
-**Architecture**:
-- EVERY feature as library? No - pragmatic module structure instead
-- Libraries listed: N/A - using service modules within projects
-- CLI per library: N/A - single CLI for development tasks
-- Library docs: Standard JSDoc/TSDoc format
-
-**Testing (NON-NEGOTIABLE)**:
-- RED-GREEN-Refactor cycle enforced? Yes
-- Git commits show tests before implementation? Yes
-- Order: Contract→Integration→E2E→Unit strictly followed? Yes
-- Real dependencies used? Yes (SQLite, not mocks)
-- Integration tests for: new libraries, contract changes, shared schemas? Yes
-- FORBIDDEN: Implementation before test, skipping RED phase - Understood
-
-**Observability**:
-- Structured logging included? Yes (pino logger)
-- Frontend logs → backend? Yes (unified stream)
-- Error context sufficient? Yes
-
-**Versioning**:
-- Version number assigned? 0.1.0
-- BUILD increments on every change? Yes
-- Breaking changes handled? Yes (migration scripts)
+- ✅ **TDD Required**: Tests written first per CLAUDE.md requirement
+- ✅ **TypeScript Strict Mode**: Enforced throughout
+- ✅ **Simplicity**: Direct SQLite access via Drizzle ORM, no unnecessary abstractions
+- ✅ **Testability**: Unit tests (Vitest) + E2E tests (Playwright), >80% coverage
+- ✅ **Performance**: <200ms target aligns with <100ms note ops and <150ms search specs in CLAUDE.md
 
 ## Project Structure
 
 ### Documentation (this feature)
 ```
-specs/001-thread-based-note/
+specs/[###-feature]/
 ├── plan.md              # This file (/plan command output)
 ├── research.md          # Phase 0 output (/plan command)
 ├── data-model.md        # Phase 1 output (/plan command)
@@ -92,33 +70,31 @@ specs/001-thread-based-note/
 
 ### Source Code (repository root)
 ```
-# Selected: Option 2 - Web application structure
-
 backend/
 ├── src/
-│   ├── models/       # Drizzle ORM schemas
-│   ├── services/     # Business logic with Repository pattern
-│   └── api/          # Hono routes and middleware
+│   ├── models/       # Drizzle schemas: notes, mentions, search-index
+│   ├── services/     # Business logic: note operations, search, validation
+│   └── api/          # Hono routes: /api/notes endpoints
 └── tests/
-    ├── contract/     # OpenAPI contract tests
-    ├── integration/  # Feature integration tests
-    └── unit/         # Vitest unit tests
+    ├── contract/     # API contract tests (OpenAPI validation)
+    ├── integration/  # Service integration tests
+    └── unit/         # Model and service unit tests
 
 frontend/
 ├── src/
-│   ├── components/   # React components
-│   ├── pages/        # Page components
-│   └── services/     # API client services
+│   ├── components/   # React components: NoteList, ThreadView, Editor
+│   ├── pages/        # Main page with split view
+│   └── services/     # API client, state management
 └── tests/
-    ├── components/   # Component tests
-    └── e2e/          # Playwright tests
+    ├── e2e/          # Playwright tests for user scenarios
+    └── unit/         # Component unit tests
 
 shared/
-├── types/           # Shared TypeScript interfaces
-└── constants/       # Shared constants
+├── types/            # TypeScript interfaces: Note, Mention, API contracts
+└── constants/        # Shared constants: limits, error codes
 ```
 
-**Structure Decision**: Option 2 - Web application (frontend + backend + shared)
+**Structure Decision**: Web application (Option 2). Frontend serves split-view React UI, backend provides REST API via Hono. Shared types ensure type safety across boundary. SQLite database embedded in backend.
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
@@ -164,7 +140,8 @@ shared/
    - Quickstart test = story validation steps
 
 5. **Update agent file incrementally** (O(1) operation):
-   - Run `/scripts/update-agent-context.sh [claude|gemini|copilot]` for your AI assistant
+   - Run `.specify/scripts/bash/update-agent-context.sh claude`
+     **IMPORTANT**: Execute it exactly as specified above. Do not add or remove any arguments.
    - If exists: Add only NEW tech from current plan
    - Preserve manual additions between markers
    - Update recent changes (keep last 3)
@@ -177,19 +154,62 @@ shared/
 *This section describes what the /tasks command will do - DO NOT execute during /plan*
 
 **Task Generation Strategy**:
-- Load `/templates/tasks-template.md` as base
+- Load `.specify/templates/tasks-template.md` as base
 - Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
 - Each contract → contract test task [P]
-- Each entity → model creation task [P] 
+- Each entity → model creation task [P]
 - Each user story → integration test task
 - Implementation tasks to make tests pass
 
 **Ordering Strategy**:
-- TDD order: Tests before implementation 
+- TDD order: Tests before implementation
 - Dependency order: Models before services before UI
 - Mark [P] for parallel execution (independent files)
 
-**Estimated Output**: 25-30 numbered, ordered tasks in tasks.md
+**Task Breakdown by Layer**:
+1. **Database Setup** (1-2 tasks):
+   - Drizzle schema definitions for Note, Mention, SearchIndex
+   - Database migration setup
+
+2. **Contract Tests** (3-5 tasks) [P]:
+   - API contract tests for each endpoint (7 endpoints per spec)
+   - Schema validation tests
+
+3. **Model Layer** (2-3 tasks) [P]:
+   - Note model with validation (1000 char limit, circular ref check)
+   - Mention extraction and validation
+   - Search index synchronization
+
+4. **Service Layer** (5-7 tasks):
+   - Note CRUD service with cascade delete
+   - Circular reference detection (DFS algorithm)
+   - Search service with FTS5
+   - Mention tracking service
+
+5. **API Layer** (3-5 tasks):
+   - Hono routes implementation
+   - Validation middleware (Zod schemas)
+   - Error handling middleware
+
+6. **Frontend Components** (8-10 tasks) [P]:
+   - NoteList component with infinite scroll
+   - ThreadView component
+   - NoteEditor with markdown preview
+   - Split-view layout
+   - Mention detection UI
+   - API client service
+
+7. **Integration Tests** (5-6 tasks):
+   - Thread creation and hierarchy tests
+   - Mention detection and navigation tests
+   - Search functionality tests
+   - Cascade deletion tests
+
+8. **E2E Tests** (8-10 tasks):
+   - All 16 acceptance scenarios from spec
+   - Performance validation (<200ms)
+
+**Estimated Output**: 35-45 numbered, ordered tasks in tasks.md
 
 **IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
 
@@ -205,8 +225,8 @@ shared/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| Repository pattern | Clean separation between business logic and data access for testing | Direct Drizzle ORM calls in services would make unit testing require real DB |
-| No library architecture | Simpler to maintain for single-developer project | Library-per-feature adds unnecessary complexity for a focused application |
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
 
 
 ## Progress Tracking
@@ -216,7 +236,7 @@ shared/
 - [x] Phase 0: Research complete (/plan command)
 - [x] Phase 1: Design complete (/plan command)
 - [x] Phase 2: Task planning complete (/plan command - describe approach only)
-- [ ] Phase 3: Tasks generated (/tasks command)
+- [x] Phase 3: Tasks generated (/tasks command)
 - [ ] Phase 4: Implementation complete
 - [ ] Phase 5: Validation passed
 
@@ -224,7 +244,7 @@ shared/
 - [x] Initial Constitution Check: PASS
 - [x] Post-Design Constitution Check: PASS
 - [x] All NEEDS CLARIFICATION resolved
-- [x] Complexity deviations documented
+- [x] Complexity deviations documented (none)
 
 ---
 *Based on Constitution v2.1.1 - See `/memory/constitution.md`*

@@ -58,7 +58,9 @@
 - [ ] T025 [P] Integration test: Navigate thread hierarchy in backend/tests/integration/thread-navigation.test.ts
 - [ ] T026 [P] Integration test: Edit existing note in backend/tests/integration/edit-note.test.ts
 - [ ] T027 [P] Integration test: Delete note with cascade in backend/tests/integration/delete-cascade.test.ts
-- [ ] T028 [P] Integration test: Handle circular references in backend/tests/integration/circular-refs.test.ts
+- [ ] T028 [P] Integration test: Prevent circular references (DFS validation) in backend/tests/integration/circular-refs.test.ts
+- [ ] T028.5 [P] Integration test: Enforce 1000 character limit in backend/tests/integration/char-limit.test.ts
+- [ ] T028.6 [P] Integration test: Performance validation (<200ms) in backend/tests/integration/performance.test.ts
 
 ## Phase 3.5: Repository Layer Implementation
 - [ ] T029 [P] Create NoteRepository in backend/src/repositories/note.repository.ts
@@ -68,10 +70,10 @@
 - [ ] T033 Implement mention parser (@ID syntax) in backend/src/utils/mention-parser.ts
 
 ## Phase 3.6: Service Layer Implementation
-- [ ] T034 Create NoteService with CRUD operations in backend/src/services/note.service.ts
+- [ ] T034 Create NoteService with CRUD and 1000 char validation in backend/src/services/note.service.ts
 - [ ] T035 Create ThreadService for hierarchy management in backend/src/services/thread.service.ts
-- [ ] T036 Create MentionService for reference tracking in backend/src/services/mention.service.ts
-- [ ] T037 Create SearchService with full-text search in backend/src/services/search.service.ts
+- [ ] T036 Create MentionService with circular reference detection (DFS) in backend/src/services/mention.service.ts
+- [ ] T037 Create SearchService with FTS5 full-text search in backend/src/services/search.service.ts
 - [ ] T038 Implement cascade delete logic in backend/src/services/delete.service.ts
 
 ## Phase 3.7: API Implementation (Make Tests Pass)
@@ -166,16 +168,18 @@ Task: "Create ThreadView component"
 ```
 
 ## Notes
-- Total tasks: 84
-- Parallel tasks: 43 (marked with [P])
+- Total tasks: 87 (updated to include clarification-driven tasks)
+- Parallel tasks: 46 (marked with [P])
 - Strict TDD: Tests in phases 3.3-3.4 MUST fail before implementation
+- Clarifications enforced: 1000 char limit, circular ref prevention, <200ms performance
 - Commit after each task completion
 - Run tests continuously during development
 
 ## Validation Checklist
 - ✅ All 7 API endpoints have contract tests (T014-T020)
 - ✅ All 3 entities have models (T008-T010)
-- ✅ All 10 quickstart scenarios have tests (T021-T028, T073-T076)
+- ✅ All quickstart scenarios have tests (T021-T028.6, T073-T076)
+- ✅ Clarification requirements covered (1000 chars: T028.5, circular refs: T028, <200ms: T028.6)
 - ✅ Tests come before implementation (Phase 3.3-3.4 before 3.5-3.7)
 - ✅ Parallel tasks work on different files
 - ✅ Each task specifies exact file path

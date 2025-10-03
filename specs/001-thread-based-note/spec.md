@@ -52,6 +52,15 @@ When creating this spec from a user prompt:
 
 ---
 
+## Clarifications
+
+### Session 2025-10-03
+- Q: What is the maximum allowed note length? → A: 1000 characters
+- Q: What is the expected behavior when circular mention references are detected? → A: Block/prevent creation of circular references
+- Q: What is the acceptable performance degradation threshold? → A: <200ms response time up to 1000 notes
+
+---
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### Primary User Story
@@ -69,14 +78,10 @@ As a knowledge worker, I want to create notes that can reference and reply to ot
 10. **Given** a user has multiple notes, **When** they clicked on a note, **Then** they can see the note's threads in the right half of the screen
 11. **Given** a user has multiple notes, **When** they delete a note, **Then** the note and all its replies are deleted
 12. **Given** a user has multiple notes, **When** they add a tag to a note, **Then** the note is findable through that tag
-13. **Given** a user has multiple notes, **When** circular references are created, **Then** the system should handle them gracefully
+13. **Given** a user has multiple notes, **When** they attempt to create a circular reference (e.g., note A mentions B, B mentions C, C mentions A), **Then** the system prevents the creation and displays an error message
 14. **Given** a user has multiple notes, **When** they search for non-existent note ID, **Then** the system doesn't show any results
-15. **Given** a user is composing a note, **When** they typed very long note, **Then** the note should not be saved
-16. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
-17. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
-18. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
-19. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
-20. **Given** a user has multiple notes, **When** the system is under heavy load, **Then** the system should handle it gracefully
+15. **Given** a user is composing a note, **When** they type a note exceeding 1000 characters, **Then** the note should not be saved and an error message is displayed
+16. **Given** a user has up to 1000 notes, **When** they perform any operation (create, read, search, delete), **Then** the system responds in less than 200ms
 
 
 ## Requirements *(mandatory)*
@@ -92,15 +97,15 @@ As a knowledge worker, I want to create notes that can reference and reply to ot
 - **FR-009**: System MUST persist all notes and their relationships
 - **FR-010**: System MUST display timestamps for when notes were created and last modified
 - **FR-011**: System MUST have unique IDs for each note and enable users to copy them
-- **FR-012**: System MUST enforce maximum note length limits
+- **FR-012**: System MUST enforce a maximum note length of 1000 characters and reject notes exceeding this limit with a clear error message
 - **FR-013**: Notes MUST support markdown formatting
 - **FR-014**: System MUST display notes in split view (list on left, thread on right)
 - **FR-015**: System MUST display notes chronologically (oldest at top, newest at bottom)
 - **FR-016**: System MUST implement infinite scroll for note lists
 - **FR-017**: System MUST cascade delete replies when parent note is deleted
-- **FR-018**: System MUST handle circular references gracefully
+- **FR-018**: System MUST detect and prevent circular mention references, rejecting the note creation/edit with a clear error message
 - **FR-019**: System MUST return no results for non-existent note ID searches
-- **FR-020**: System MUST handle system load gracefully with performance degradation
+- **FR-020**: System MUST maintain response times under 200ms for all operations (create, read, search, delete) with up to 1000 notes
 
 ### Key Entities *(include if feature involves data)*
 - **Note**: Represents a single piece of content that can be standalone or part of a thread. Contains unique ID, markdown text content, creation timestamp, modification timestamp, and optional parent reference
