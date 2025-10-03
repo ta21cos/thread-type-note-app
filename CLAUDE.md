@@ -7,6 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Thread-based note-taking application for personal knowledge management. Users can create interconnected notes with replies and mentions (@ID), similar to social media threads.
 
 ## Active Technologies
+- TypeScript 5.x with Bun runtime + React 18 (frontend), Hono (backend), Drizzle ORM, DOMPurify (sanitization) (001-thread-based-note)
+- SQLite (embedded, offline-first) with full-text search (001-thread-based-note)
 
 - **TypeScript 5.x** / Bun runtime
 - **React 18** - Frontend UI framework  
@@ -121,6 +123,7 @@ GET    /api/notes/:id/mentions # Get mentions
 - Run tests before commit
 
 ## Recent Changes
+- 001-thread-based-note: Added TypeScript 5.x with Bun runtime + React 18 (frontend), Hono (backend), Drizzle ORM, DOMPurify (sanitization)
 
 - **001-thread-based-note**: Initial implementation with TypeScript, React, Hono, and SQLite
 
