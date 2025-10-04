@@ -23,21 +23,21 @@
 - Include exact file paths in descriptions
 
 ## Phase 3.1: Project Setup
-- [ ] T001 Create project structure with backend/, frontend/, shared/ directories
-- [ ] T002 Initialize backend with Bun, TypeScript, Hono, Drizzle ORM
-- [ ] T003 Initialize frontend with Bun, TypeScript, React 18, Vite
-- [ ] T004 [P] Configure ESLint and Prettier for TypeScript
-- [ ] T005 [P] Setup Vitest configuration in backend/vitest.config.ts
-- [ ] T006 [P] Setup Playwright configuration in frontend/playwright.config.ts
-- [ ] T007 Create shared TypeScript interfaces in shared/types/index.ts
+- [x] T001 Create project structure with backend/, frontend/, shared/ directories
+- [x] T002 Initialize backend with Bun, TypeScript, Hono, Drizzle ORM
+- [x] T003 Initialize frontend with Bun, TypeScript, React 18, Vite
+- [x] T004 [P] Configure ESLint and Prettier for TypeScript
+- [x] T005 [P] Setup Vitest configuration in backend/vitest.config.ts
+- [x] T006 [P] Setup Playwright configuration in frontend/playwright.config.ts
+- [x] T007 Create shared TypeScript interfaces in shared/types/index.ts
 
 ## Phase 3.2: Database Setup
-- [ ] T008 Create Drizzle schema for Note entity in backend/src/models/note.schema.ts
-- [ ] T009 Create Drizzle schema for Mention entity in backend/src/models/mention.schema.ts
-- [ ] T010 Create Drizzle schema for SearchIndex in backend/src/models/search.schema.ts
-- [ ] T011 Setup Drizzle config and SQLite connection in backend/src/db/index.ts
-- [ ] T012 Create database migration files with Drizzle Kit
-- [ ] T013 Create seed script for test data in backend/src/db/seed.ts
+- [x] T008 Create Drizzle schema for Note entity in backend/src/models/note.schema.ts
+- [x] T009 Create Drizzle schema for Mention entity in backend/src/models/mention.schema.ts
+- [x] T010 Create Drizzle schema for SearchIndex in backend/src/models/search.schema.ts
+- [x] T011 Setup Drizzle config and SQLite connection in backend/src/db/index.ts
+- [x] T012 Create database migration files with Drizzle Kit
+- [x] T013 Create seed script for test data in backend/src/db/seed.ts
 
 ## Phase 3.3: Contract Tests (TDD - MUST FAIL FIRST) ⚠️
 **CRITICAL: Write these tests BEFORE implementation. They MUST fail initially.**
