@@ -1,0 +1,13 @@
+{
+  "name": "@thread-note/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./types/index.ts",
+  "types": "./types/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
