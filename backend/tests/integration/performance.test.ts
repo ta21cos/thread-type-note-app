@@ -1,16 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { db, notes } from '../../src/db';
 import { PERFORMANCE_TARGETS } from '@thread-note/shared/constants';
+import { noteService } from '../../src/services/note.service';
+import { searchService } from '../../src/services/search.service';
+import { deleteService } from '../../src/services/delete.service';
 
 // NOTE: Integration test for <200ms performance requirement (from clarifications)
-// This test MUST fail until services are implemented and optimized
 describe('Performance Validation (<200ms) Scenario', () => {
   beforeEach(async () => {
     await db.delete(notes);
   });
 
   it('should perform create operation in <200ms', async () => {
-    const noteService = await import('../../src/services/note.service');
+    
 
     const start = Date.now();
     await noteService.createNote({ content: 'Performance test' });
@@ -20,7 +22,7 @@ describe('Performance Validation (<200ms) Scenario', () => {
   });
 
   it('should perform read operation in <200ms with 1000 notes', async () => {
-    const noteService = await import('../../src/services/note.service');
+    
 
     // Seed 1000 notes
     const promises = Array.from({ length: 100 }, (_, i) =>
@@ -36,8 +38,8 @@ describe('Performance Validation (<200ms) Scenario', () => {
   });
 
   it('should perform search in <200ms with 1000 notes', async () => {
-    const noteService = await import('../../src/services/note.service');
-    const searchService = await import('../../src/services/search.service');
+    
+    
 
     // Seed notes
     const promises = Array.from({ length: 100 }, (_, i) =>
@@ -53,8 +55,8 @@ describe('Performance Validation (<200ms) Scenario', () => {
   });
 
   it('should perform delete operation in <200ms', async () => {
-    const noteService = await import('../../src/services/note.service');
-    const deleteService = await import('../../src/services/delete.service');
+    
+    
 
     const note = await noteService.createNote({ content: 'To delete' });
 

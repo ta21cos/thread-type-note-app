@@ -97,22 +97,22 @@
 - [x] T053 Create SplitView layout in frontend/src/layouts/SplitView.tsx
 
 ## Phase 3.8.5: Frontend Infrastructure
-- [ ] T053.1 [P] Create index.html entry point in frontend/index.html
-- [ ] T053.2 [P] Create vite.config.ts with React plugin and proxy in frontend/vite.config.ts
-- [ ] T053.3 [P] Create main.tsx React entry point in frontend/src/main.tsx
-- [ ] T053.4 [P] Create global CSS structure in frontend/src/styles/index.css
+- [x] T053.1 [P] Create index.html entry point in frontend/index.html
+- [x] T053.2 [P] Create vite.config.ts with React plugin and proxy in frontend/vite.config.ts
+- [x] T053.3 [P] Create main.tsx React entry point in frontend/src/main.tsx
+- [x] T053.4 [P] Create global CSS structure in frontend/src/styles/index.css
 
 ## Phase 3.9: Frontend Services
-- [ ] T054 [P] Create API client service in frontend/src/services/api.client.ts
-- [ ] T055 [P] Create NoteService for API calls in frontend/src/services/note.service.ts
-- [ ] T056 [P] Create WebSocket service for real-time in frontend/src/services/websocket.service.ts
-- [ ] T057 Create state management with Zustand in frontend/src/store/notes.store.ts
+- [x] T054 [P] Create API client service in frontend/src/services/api.client.ts
+- [x] T055 [P] Create NoteService for API calls in frontend/src/services/note.service.ts (using TanStack Query)
+- [x] T056 [P] Create WebSocket service for real-time in frontend/src/services/websocket.service.ts
+- [x] T057 Create UI state management with React Context in frontend/src/store/notes.store.tsx
 
 ## Phase 3.10: Frontend Pages & Routing
-- [ ] T058 Create main App component in frontend/src/App.tsx
-- [ ] T059 Setup React Router in frontend/src/router/index.tsx
-- [ ] T060 Create NotesPage with split view in frontend/src/pages/NotesPage.tsx
-- [ ] T061 Implement infinite scroll in frontend/src/hooks/useInfiniteScroll.ts
+- [x] T058 Create main App component in frontend/src/App.tsx
+- [x] T059 Setup React Router in frontend/src/router/index.tsx
+- [x] T060 Create NotesPage with split view in frontend/src/pages/NotesPage.tsx
+- [x] T061 Implement infinite scroll in frontend/src/hooks/useInfiniteScroll.ts
 - [ ] T062 Implement virtual scrolling with react-window in frontend/src/hooks/useVirtualScroll.ts
 
 ## Phase 3.11: Real-time & Performance

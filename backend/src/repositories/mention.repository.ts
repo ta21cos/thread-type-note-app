@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import { db, mentions, notes, type Mention, type NewMention } from '../db';
 
 // NOTE: Repository for Mention operations
@@ -17,10 +17,11 @@ export class MentionRepository {
   }
 
   async deleteByNoteId(noteId: string): Promise<void> {
+    // NOTE: Delete mentions where note is either sender OR receiver
     await db
       .delete(mentions)
       .where(
-        and(eq(mentions.fromNoteId, noteId), eq(mentions.toNoteId, noteId))
+        or(eq(mentions.fromNoteId, noteId), eq(mentions.toNoteId, noteId))
       );
   }
 

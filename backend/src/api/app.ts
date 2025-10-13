@@ -13,10 +13,10 @@ const app = new Hono();
 app.use('*', logger());
 app.use('*', cors());
 
-// Routes
-app.route('/api/notes', notesRoutes);
-app.route('/api/notes', searchRoutes);
-app.route('/api/notes', mentionsRoutes);
+// Routes - Order matters! Specific routes before generic ones
+app.route('/api/notes', searchRoutes);  // /search route
+app.route('/api/notes', mentionsRoutes); // /:id/mentions route
+app.route('/api/notes', notesRoutes);   // /:id route (must be last)
 
 // Error handling
 app.onError(errorHandler);

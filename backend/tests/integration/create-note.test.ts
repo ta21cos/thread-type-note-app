@@ -1,17 +1,23 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { db, notes } from '../../src/db';
+import { NoteService } from '../../src/services/note.service';
+import { ThreadService } from '../../src/services/thread.service';
 
 // NOTE: Integration test for creating first note scenario
 // This test MUST fail until services are implemented
 describe('Create First Note Scenario', () => {
+  let noteService: NoteService;
+  let threadService: ThreadService;
+
   beforeEach(async () => {
     // Clean database before each test
     await db.delete(notes);
+    // Initialize services
+    noteService = new NoteService();
+    threadService = new ThreadService();
   });
 
   it('should create and save first note as root', async () => {
-    // This will fail until NoteService is implemented
-    const noteService = await import('../../src/services/note.service');
     const result = await noteService.createNote({
       content: 'My first note',
     });
@@ -24,10 +30,7 @@ describe('Create First Note Scenario', () => {
   });
 
   it('should display note in standalone thread', async () => {
-    const noteService = await import('../../src/services/note.service');
     const note = await noteService.createNote({ content: 'Test' });
-
-    const threadService = await import('../../src/services/thread.service');
     const thread = await threadService.getThread(note.id);
 
     expect(thread).toHaveLength(1);

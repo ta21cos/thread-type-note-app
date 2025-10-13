@@ -1,8 +1,37 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { db, notes } from '../../src/db';
 
 // NOTE: Contract test for DELETE /api/notes/:id (delete note with cascade)
-// This test MUST fail until the endpoint is implemented
 describe('DELETE /api/notes/:id', () => {
+  beforeEach(async () => {
+    // NOTE: Create fresh test data for each test
+    await db.insert(notes).values({
+      id: 'abc123',
+      content: 'Test note to delete',
+      depth: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).onConflictDoNothing();
+
+    // Create parent-child structure for cascade test
+    await db.insert(notes).values({
+      id: 'prnt23',
+      content: 'Parent note',
+      depth: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).onConflictDoNothing();
+
+    await db.insert(notes).values({
+      id: 'chld56',
+      content: 'Child note',
+      parentId: 'prnt23',
+      depth: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).onConflictDoNothing();
+  });
+
   it('should delete note and return 204', async () => {
     const response = await fetch('http://localhost:3000/api/notes/abc123', {
       method: 'DELETE',
@@ -13,12 +42,12 @@ describe('DELETE /api/notes/:id', () => {
 
   it('should cascade delete all child notes', async () => {
     // Delete parent
-    await fetch('http://localhost:3000/api/notes/parent123', {
+    await fetch('http://localhost:3000/api/notes/prnt23', {
       method: 'DELETE',
     });
 
     // Verify children are also deleted
-    const childResponse = await fetch('http://localhost:3000/api/notes/child456');
+    const childResponse = await fetch('http://localhost:3000/api/notes/chld56');
     expect(childResponse.status).toBe(404);
   });
 

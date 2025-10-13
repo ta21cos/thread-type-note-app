@@ -1,8 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { db, notes } from '../../src/db';
 
 // NOTE: Contract test for POST /api/notes (create note)
-// This test MUST fail until the endpoint is implemented
 describe('POST /api/notes', () => {
+  beforeAll(async () => {
+    // NOTE: Ensure parent note exists for reply test
+    await db.insert(notes).values({
+      id: 'abc123',
+      content: 'Parent note for replies',
+      depth: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).onConflictDoNothing();
+  });
   it('should create a new root note', async () => {
     const response = await fetch('http://localhost:3000/api/notes', {
       method: 'POST',

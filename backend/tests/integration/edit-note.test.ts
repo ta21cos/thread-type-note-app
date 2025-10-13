@@ -1,16 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { db, notes } from '../../src/db';
+import { noteService } from '../../src/services/note.service';
 
 // NOTE: Integration test for editing notes
-// This test MUST fail until services are implemented
 describe('Edit Existing Note Scenario', () => {
   beforeEach(async () => {
     await db.delete(notes);
   });
 
   it('should update note content and timestamp', async () => {
-    const noteService = await import('../../src/services/note.service');
-
     const note = await noteService.createNote({ content: 'Original content' });
     const originalUpdatedAt = note.updatedAt;
 
@@ -26,7 +24,6 @@ describe('Edit Existing Note Scenario', () => {
   });
 
   it('should enforce 1000 character limit on update', async () => {
-    const noteService = await import('../../src/services/note.service');
 
     const note = await noteService.createNote({ content: 'Short' });
 

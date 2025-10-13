@@ -1,36 +1,34 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { db, notes } from '../../src/db';
+import { noteService } from '../../src/services/note.service';
+import { threadService } from '../../src/services/thread.service';
 
 // NOTE: Integration test for thread navigation
-// This test MUST fail until services are implemented
 describe('Navigate Thread Hierarchy Scenario', () => {
   beforeEach(async () => {
     await db.delete(notes);
   });
 
   it('should navigate from any note to thread root', async () => {
-    const noteService = await import('../../src/services/note.service');
-    const threadService = await import('../../src/services/thread.service');
+    // NOTE: Only 2 levels allowed - test parent-child navigation
 
     const root = await noteService.createNote({ content: 'Root' });
     const child = await noteService.createNote({
       content: 'Child',
       parentId: root.id,
     });
-    const grandchild = await noteService.createNote({
-      content: 'Grandchild',
-      parentId: child.id,
-    });
 
-    const thread = await threadService.getThread(grandchild.id);
+    // Get thread from child should return both parent and child
+    const thread = await threadService.getThread(child.id);
 
     expect(thread[0].id).toBe(root.id);
-    expect(thread).toHaveLength(3);
+    expect(thread).toHaveLength(2); // Only parent and child
+    expect(thread[1].id).toBe(child.id);
   });
 
   it('should show threaded/nested format with parent-child relationships', async () => {
-    const noteService = await import('../../src/services/note.service');
-    const threadService = await import('../../src/services/thread.service');
+    
+    
 
     const parent = await noteService.createNote({ content: 'Parent' });
     const child1 = await noteService.createNote({

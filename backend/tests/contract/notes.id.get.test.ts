@@ -1,8 +1,23 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { db, notes } from '../../src/db';
+import { eq } from 'drizzle-orm';
 
 // NOTE: Contract test for GET /api/notes/:id (get note with thread)
-// This test MUST fail until the endpoint is implemented
 describe('GET /api/notes/:id', () => {
+  beforeAll(async () => {
+    // NOTE: Ensure test data exists
+    const existing = await db.select().from(notes).where(eq(notes.id, 'abc123'));
+    if (existing.length === 0) {
+      await db.insert(notes).values({
+        id: 'abc123',
+        content: 'Test note for contract tests',
+        depth: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  });
+
   it('should return note details with thread', async () => {
     const response = await fetch('http://localhost:3000/api/notes/abc123?includeThread=true');
     const data = await response.json();

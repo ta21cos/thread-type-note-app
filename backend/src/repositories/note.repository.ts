@@ -1,5 +1,5 @@
 import { eq, isNull, desc } from 'drizzle-orm';
-import { db, notes, type Note, type NewNote } from '../db';
+import { db, sqlite, notes, type Note, type NewNote } from '../db';
 
 // NOTE: Repository for Note CRUD operations
 export class NoteRepository {
@@ -50,18 +50,37 @@ export class NoteRepository {
 
   async getThreadRecursive(rootId: string): Promise<Note[]> {
     // NOTE: SQLite recursive CTE to get full thread
-    const query = db.execute<Note>(
-      `
+    const query = sqlite.query(`
       WITH RECURSIVE thread AS (
-        SELECT * FROM notes WHERE id = ?
+        SELECT
+          id,
+          content,
+          parent_id as parentId,
+          created_at as createdAt,
+          updated_at as updatedAt,
+          depth
+        FROM notes WHERE id = ?
         UNION ALL
-        SELECT n.* FROM notes n
+        SELECT
+          n.id,
+          n.content,
+          n.parent_id as parentId,
+          n.created_at as createdAt,
+          n.updated_at as updatedAt,
+          n.depth
+        FROM notes n
         JOIN thread t ON n.parent_id = t.id
       )
-      SELECT * FROM thread ORDER BY depth, created_at
-      `,
-      [rootId]
-    );
-    return query as unknown as Promise<Note[]>;
+      SELECT * FROM thread ORDER BY depth, createdAt
+    `);
+
+    const results = query.all(rootId) as Note[];
+
+    // NOTE: Convert Date objects to ISO strings for serialization
+    return results.map(note => ({
+      ...note,
+      createdAt: note.createdAt instanceof Date ? note.createdAt.toISOString() : note.createdAt,
+      updatedAt: note.updatedAt instanceof Date ? note.updatedAt.toISOString() : note.updatedAt
+    }));
   }
 }

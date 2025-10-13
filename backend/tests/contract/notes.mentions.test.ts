@@ -1,8 +1,27 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { db, notes } from '../../src/db';
 
 // NOTE: Contract test for GET /api/notes/:id/mentions (get notes mentioning this note)
-// This test MUST fail until the endpoint is implemented
 describe('GET /api/notes/:id/mentions', () => {
+  beforeAll(async () => {
+    // NOTE: Create test data for mention tests
+    await db.insert(notes).values({
+      id: 'abc123',
+      content: 'Note to be mentioned',
+      depth: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).onConflictDoNothing();
+
+    await db.insert(notes).values({
+      id: 'noment',
+      content: 'Note with no mentions',
+      depth: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).onConflictDoNothing();
+  });
+
   it('should return list of notes mentioning the specified note', async () => {
     const response = await fetch('http://localhost:3000/api/notes/abc123/mentions');
     const data = await response.json();
@@ -25,7 +44,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should return empty array for note with no mentions', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/nomention/mentions');
+    const response = await fetch('http://localhost:3000/api/notes/noment/mentions');
     const data = await response.json();
 
     expect(response.status).toBe(200);

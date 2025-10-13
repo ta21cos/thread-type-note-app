@@ -3,8 +3,8 @@ export interface Note {
   id: string; // 6-char alphanumeric ID
   content: string; // Markdown content (max 1000 chars)
   parentId?: string; // Reference to parent note (null for root)
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO 8601 string
+  updatedAt: string; // ISO 8601 string
   depth: number; // Thread depth (0 for root)
 }
 
@@ -13,7 +13,7 @@ export interface Mention {
   fromNoteId: string;
   toNoteId: string;
   position: number; // Character position in content
-  createdAt: Date;
+  createdAt: string; // ISO 8601 string
 }
 
 export interface SearchIndex {
@@ -21,7 +21,7 @@ export interface SearchIndex {
   content: string; // Preprocessed for search
   tokens: string[];
   mentions: string[];
-  updatedAt: Date;
+  updatedAt: string; // ISO 8601 string
 }
 
 // NOTE: API request/response types

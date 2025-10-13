@@ -46,10 +46,20 @@ app.get('/:id', validateNoteId, async (c) => {
     return c.json({ error: 'Not Found', message: 'Note not found' }, 404);
   }
 
-  const response: NoteDetailResponse = {
-    note,
-    thread: includeThread ? await threadService.getThread(id) : [],
-  };
+  const response: NoteDetailResponse = includeThread
+    ? {
+        note,
+        thread: await threadService.getThread(id),
+      }
+    : {
+        note,
+        thread: undefined as unknown, // NOTE: Don't include thread property when not requested
+      };
+
+  // Remove undefined properties
+  if (response.thread === undefined) {
+    delete (response as Record<string, unknown>).thread;
+  }
 
   return c.json(response);
 });
