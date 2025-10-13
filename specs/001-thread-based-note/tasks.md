@@ -89,12 +89,18 @@
 - [x] T047 Add validation middleware with Zod in backend/src/api/middleware/validation.ts
 
 ## Phase 3.8: Frontend Components
-- [ ] T048 [P] Create NoteList component in frontend/src/components/NoteList.tsx
-- [ ] T049 [P] Create NoteEditor component in frontend/src/components/NoteEditor.tsx
-- [ ] T050 [P] Create ThreadView component in frontend/src/components/ThreadView.tsx
-- [ ] T051 [P] Create MentionInput component in frontend/src/components/MentionInput.tsx
-- [ ] T052 [P] Create SearchBar component in frontend/src/components/SearchBar.tsx
-- [ ] T053 Create SplitView layout in frontend/src/layouts/SplitView.tsx
+- [x] T048 [P] Create NoteList component in frontend/src/components/NoteList.tsx
+- [x] T049 [P] Create NoteEditor component in frontend/src/components/NoteEditor.tsx
+- [x] T050 [P] Create ThreadView component in frontend/src/components/ThreadView.tsx
+- [x] T051 [P] Create MentionInput component in frontend/src/components/MentionInput.tsx
+- [x] T052 [P] Create SearchBar component in frontend/src/components/SearchBar.tsx
+- [x] T053 Create SplitView layout in frontend/src/layouts/SplitView.tsx
+
+## Phase 3.8.5: Frontend Infrastructure
+- [ ] T053.1 [P] Create index.html entry point in frontend/index.html
+- [ ] T053.2 [P] Create vite.config.ts with React plugin and proxy in frontend/vite.config.ts
+- [ ] T053.3 [P] Create main.tsx React entry point in frontend/src/main.tsx
+- [ ] T053.4 [P] Create global CSS structure in frontend/src/styles/index.css
 
 ## Phase 3.9: Frontend Services
 - [ ] T054 [P] Create API client service in frontend/src/services/api.client.ts
