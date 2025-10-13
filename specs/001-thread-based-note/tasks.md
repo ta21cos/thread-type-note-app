@@ -42,51 +42,51 @@
 ## Phase 3.3: Contract Tests (TDD - MUST FAIL FIRST) ⚠️
 **CRITICAL: Write these tests BEFORE implementation. They MUST fail initially.**
 
-- [ ] T014 [P] Contract test GET /api/notes in backend/tests/contract/notes.get.test.ts
-- [ ] T015 [P] Contract test POST /api/notes in backend/tests/contract/notes.post.test.ts
-- [ ] T016 [P] Contract test GET /api/notes/:id in backend/tests/contract/notes.id.get.test.ts
-- [ ] T017 [P] Contract test PUT /api/notes/:id in backend/tests/contract/notes.id.put.test.ts
-- [ ] T018 [P] Contract test DELETE /api/notes/:id in backend/tests/contract/notes.id.delete.test.ts
-- [ ] T019 [P] Contract test GET /api/notes/search in backend/tests/contract/notes.search.test.ts
-- [ ] T020 [P] Contract test GET /api/notes/:id/mentions in backend/tests/contract/notes.mentions.test.ts
+- [x] T014 [P] Contract test GET /api/notes in backend/tests/contract/notes.get.test.ts
+- [x] T015 [P] Contract test POST /api/notes in backend/tests/contract/notes.post.test.ts
+- [x] T016 [P] Contract test GET /api/notes/:id in backend/tests/contract/notes.id.get.test.ts
+- [x] T017 [P] Contract test PUT /api/notes/:id in backend/tests/contract/notes.id.put.test.ts
+- [x] T018 [P] Contract test DELETE /api/notes/:id in backend/tests/contract/notes.id.delete.test.ts
+- [x] T019 [P] Contract test GET /api/notes/search in backend/tests/contract/notes.search.test.ts
+- [x] T020 [P] Contract test GET /api/notes/:id/mentions in backend/tests/contract/notes.mentions.test.ts
 
 ## Phase 3.4: Integration Tests (TDD - MUST FAIL FIRST) ⚠️
-- [ ] T021 [P] Integration test: Create first note scenario in backend/tests/integration/create-note.test.ts
-- [ ] T022 [P] Integration test: Reply to note (thread) in backend/tests/integration/thread-reply.test.ts
-- [ ] T023 [P] Integration test: Mention another note in backend/tests/integration/mention-note.test.ts
-- [ ] T024 [P] Integration test: Search by content in backend/tests/integration/search-content.test.ts
-- [ ] T025 [P] Integration test: Navigate thread hierarchy in backend/tests/integration/thread-navigation.test.ts
-- [ ] T026 [P] Integration test: Edit existing note in backend/tests/integration/edit-note.test.ts
-- [ ] T027 [P] Integration test: Delete note with cascade in backend/tests/integration/delete-cascade.test.ts
-- [ ] T028 [P] Integration test: Prevent circular references (DFS validation) in backend/tests/integration/circular-refs.test.ts
-- [ ] T028.5 [P] Integration test: Enforce 1000 character limit in backend/tests/integration/char-limit.test.ts
-- [ ] T028.6 [P] Integration test: Performance validation (<200ms) in backend/tests/integration/performance.test.ts
+- [x] T021 [P] Integration test: Create first note scenario in backend/tests/integration/create-note.test.ts
+- [x] T022 [P] Integration test: Reply to note (thread) in backend/tests/integration/thread-reply.test.ts
+- [x] T023 [P] Integration test: Mention another note in backend/tests/integration/mention-note.test.ts
+- [x] T024 [P] Integration test: Search by content in backend/tests/integration/search-content.test.ts
+- [x] T025 [P] Integration test: Navigate thread hierarchy in backend/tests/integration/thread-navigation.test.ts
+- [x] T026 [P] Integration test: Edit existing note in backend/tests/integration/edit-note.test.ts
+- [x] T027 [P] Integration test: Delete note with cascade in backend/tests/integration/delete-cascade.test.ts
+- [x] T028 [P] Integration test: Prevent circular references (DFS validation) in backend/tests/integration/circular-refs.test.ts
+- [x] T028.5 [P] Integration test: Enforce 1000 character limit in backend/tests/integration/char-limit.test.ts
+- [x] T028.6 [P] Integration test: Performance validation (<200ms) in backend/tests/integration/performance.test.ts
 
 ## Phase 3.5: Repository Layer Implementation
-- [ ] T029 [P] Create NoteRepository in backend/src/repositories/note.repository.ts
-- [ ] T030 [P] Create MentionRepository in backend/src/repositories/mention.repository.ts
-- [ ] T031 [P] Create SearchRepository in backend/src/repositories/search.repository.ts
-- [ ] T032 Implement ID generation (6-char) in backend/src/utils/id-generator.ts
-- [ ] T033 Implement mention parser (@ID syntax) in backend/src/utils/mention-parser.ts
+- [x] T029 [P] Create NoteRepository in backend/src/repositories/note.repository.ts
+- [x] T030 [P] Create MentionRepository in backend/src/repositories/mention.repository.ts
+- [x] T031 [P] Create SearchRepository in backend/src/repositories/search.repository.ts
+- [x] T032 Implement ID generation (6-char) in backend/src/utils/id-generator.ts
+- [x] T033 Implement mention parser (@ID syntax) in backend/src/utils/mention-parser.ts
 
 ## Phase 3.6: Service Layer Implementation
-- [ ] T034 Create NoteService with CRUD and 1000 char validation in backend/src/services/note.service.ts
-- [ ] T035 Create ThreadService for hierarchy management in backend/src/services/thread.service.ts
-- [ ] T036 Create MentionService with circular reference detection (DFS) in backend/src/services/mention.service.ts
-- [ ] T037 Create SearchService with FTS5 full-text search in backend/src/services/search.service.ts
-- [ ] T038 Implement cascade delete logic in backend/src/services/delete.service.ts
+- [x] T034 Create NoteService with CRUD and 1000 char validation in backend/src/services/note.service.ts
+- [x] T035 Create ThreadService for hierarchy management in backend/src/services/thread.service.ts
+- [x] T036 Create MentionService with circular reference detection (DFS) in backend/src/services/mention.service.ts
+- [x] T037 Create SearchService with FTS5 full-text search in backend/src/services/search.service.ts
+- [x] T038 Implement cascade delete logic in backend/src/services/delete.service.ts
 
 ## Phase 3.7: API Implementation (Make Tests Pass)
-- [ ] T038.5 Create Hono app instance and router setup in backend/src/api/app.ts
-- [ ] T039 Implement GET /api/notes endpoint in backend/src/api/routes/notes.ts
-- [ ] T040 Implement POST /api/notes endpoint in backend/src/api/routes/notes.ts
-- [ ] T041 Implement GET /api/notes/:id endpoint in backend/src/api/routes/notes.ts
-- [ ] T042 Implement PUT /api/notes/:id endpoint in backend/src/api/routes/notes.ts
-- [ ] T043 Implement DELETE /api/notes/:id endpoint in backend/src/api/routes/notes.ts
-- [ ] T044 Implement GET /api/notes/search endpoint in backend/src/api/routes/search.ts
-- [ ] T045 Implement GET /api/notes/:id/mentions endpoint in backend/src/api/routes/mentions.ts
-- [ ] T046 Add Hono middleware for error handling in backend/src/api/middleware/error.ts
-- [ ] T047 Add validation middleware with Zod in backend/src/api/middleware/validation.ts
+- [x] T038.5 Create Hono app instance and router setup in backend/src/api/app.ts
+- [x] T039 Implement GET /api/notes endpoint in backend/src/api/routes/notes.ts
+- [x] T040 Implement POST /api/notes endpoint in backend/src/api/routes/notes.ts
+- [x] T041 Implement GET /api/notes/:id endpoint in backend/src/api/routes/notes.ts
+- [x] T042 Implement PUT /api/notes/:id endpoint in backend/src/api/routes/notes.ts
+- [x] T043 Implement DELETE /api/notes/:id endpoint in backend/src/api/routes/notes.ts
+- [x] T044 Implement GET /api/notes/search endpoint in backend/src/api/routes/search.ts
+- [x] T045 Implement GET /api/notes/:id/mentions endpoint in backend/src/api/routes/mentions.ts
+- [x] T046 Add Hono middleware for error handling in backend/src/api/middleware/error.ts
+- [x] T047 Add validation middleware with Zod in backend/src/api/middleware/validation.ts
 
 ## Phase 3.8: Frontend Components
 - [ ] T048 [P] Create NoteList component in frontend/src/components/NoteList.tsx
