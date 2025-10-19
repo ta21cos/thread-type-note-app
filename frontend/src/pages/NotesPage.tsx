@@ -7,7 +7,6 @@ import { NoteEditor } from '../components/NoteEditor';
 import { SearchBar } from '../components/SearchBar';
 import { useInfiniteNotes, useNote, useCreateNote, useUpdateNote, useDeleteNote, useSearchNotes } from '../services/note.service';
 import { useNotesUI } from '../store/notes.store';
-import { useWebSocket } from '../services/websocket.service';
 
 export const NotesPage: React.FC = () => {
   const { noteId } = useParams<{ noteId?: string }>();
@@ -46,10 +45,11 @@ export const NotesPage: React.FC = () => {
   const deleteNote = useDeleteNote();
 
   // NOTE: Connect to WebSocket for real-time updates
-  useWebSocket({
-    onOpen: () => console.log('Connected to real-time updates'),
-    onError: (error) => console.error('WebSocket error:', error),
-  });
+  // TODO: Re-enable when backend WebSocket is implemented
+  // useWebSocket({
+  //   onOpen: () => console.log('Connected to real-time updates'),
+  //   onError: (error) => console.error('WebSocket error:', error),
+  // });
 
   // NOTE: Sync URL param with selected note
   useEffect(() => {
