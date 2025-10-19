@@ -78,3 +78,6 @@ Desktop.ini
 /data/
 /uploads/
 /cache/
+
+# serena
+.serena/
