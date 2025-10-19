@@ -1,6 +1,12 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { X, Send, Smile, Paperclip, MoreVertical, Trash2, Bookmark, Link2, Edit, Pin } from 'lucide-react';
 import { Note } from '../../../shared/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { getRelativeTime } from '@/lib/utils';
 import NoteEditor from './NoteEditor';
 
 interface ThreadViewProps {
@@ -12,52 +18,45 @@ interface ThreadViewProps {
   currentUserId?: string;
 }
 
-interface ThreadNodeProps {
-  note: Note;
-  children: Note[];
-  thread: Note[];
-  depth: number;
-  onReply: (parentId: string, content: string) => Promise<void>;
-  onEdit: (noteId: string, content: string) => Promise<void>;
-  onDelete: (noteId: string) => Promise<void>;
-  onMentionClick: (noteId: string) => void;
-  currentUserId?: string;
-}
-
-const ThreadNode: React.FC<ThreadNodeProps> = ({
-  note,
-  children,
+export const ThreadView: React.FC<ThreadViewProps> = ({
+  rootNote,
   thread,
-  depth,
   onReply,
   onEdit,
   onDelete,
-  onMentionClick,
-  currentUserId,
+  currentUserId: _currentUserId,
 }) => {
-  const [isReplying, setIsReplying] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
 
-  const handleReply = useCallback(async (content: string) => {
-    await onReply(note.id, content);
-    setIsReplying(false);
-  }, [note.id, onReply]);
+  const copyLink = (noteId: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/notes/${noteId}`);
+  };
 
-  const handleEdit = useCallback(async (content: string) => {
-    await onEdit(note.id, content);
-    setIsEditing(false);
-  }, [note.id, onEdit]);
+  const toggleImageExpansion = (noteId: string) => {
+    setExpandedImages((prev) => ({
+      ...prev,
+      [noteId]: !prev[noteId],
+    }));
+  };
 
-  const handleDelete = useCallback(async () => {
-    if (window.confirm(`Delete this note and all its replies? This cannot be undone.`)) {
-      await onDelete(note.id);
+  const handleReply = async () => {
+    if (!replyContent.trim()) return;
+    await onReply(rootNote.id, replyContent);
+    setReplyContent('');
+  };
+
+  const handleEdit = async (noteId: string, content: string) => {
+    await onEdit(noteId, content);
+    setIsEditing(null);
+  };
+
+  const handleDelete = async (noteId: string) => {
+    if (window.confirm('Delete this note? This cannot be undone.')) {
+      await onDelete(noteId);
     }
-  }, [note.id, onDelete]);
-
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
   };
 
   const renderContent = (content: string) => {
@@ -70,21 +69,10 @@ const ThreadNode: React.FC<ThreadNodeProps> = ({
           <a
             key={index}
             href={`#${noteId}`}
-            className="thread-node__mention"
+            className="text-primary hover:underline"
             onClick={(e) => {
               e.preventDefault();
-              // NOTE: Scroll to mentioned note if in current thread
-              const element = document.getElementById(`note-${noteId}`);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.classList.add('thread-node--highlighted');
-                setTimeout(() => {
-                  element.classList.remove('thread-node--highlighted');
-                }, 2000);
-              } else {
-                // NOTE: Navigate to mentioned note if not in current thread
-                onMentionClick(noteId);
-              }
+              navigate(`/notes/${noteId}`);
             }}
           >
             {part}
@@ -95,175 +83,313 @@ const ThreadNode: React.FC<ThreadNodeProps> = ({
     });
   };
 
+  // NOTE: Get replies (all notes except root)
+  const replies = useMemo(() => {
+    return thread
+      .filter((note) => note.id !== rootNote.id)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }, [thread, rootNote.id]);
+
   return (
-    <div
-      id={`note-${note.id}`}
-      className={`thread-node thread-node--depth-${Math.min(depth, 5)}`}
-      style={{ marginLeft: `${depth * 20}px` }}
-    >
-      <div className="thread-node__header">
-        <span className="thread-node__id">#{note.id}</span>
-        <span className="thread-node__timestamp">
-          {formatTimestamp(note.createdAt)}
-        </span>
-        {note.updatedAt && note.updatedAt !== note.createdAt && (
-          <span className="thread-node__edited">(edited)</span>
-        )}
-        {children.length > 0 && (
-          <button
-            className="thread-node__toggle"
-            onClick={() => setIsExpanded(!isExpanded)}
-            aria-label={isExpanded ? 'Collapse thread' : 'Expand thread'}
-          >
-            {isExpanded ? '−' : '+'} {children.length} {children.length === 1 ? 'reply' : 'replies'}
-          </button>
-        )}
+    <div className="flex w-full flex-col border-l border-border bg-background">
+      {/* Header */}
+      <div className="flex h-14 items-center justify-between border-b border-border px-4">
+        <h3 className="font-semibold text-foreground text-sm">Thread</h3>
+        <Button size="icon" variant="ghost" className="h-8 w-8">
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
-      <div className="thread-node__content">
-        {isEditing ? (
-          <NoteEditor
-            initialContent={note.content}
-            onSubmit={handleEdit}
-            onCancel={() => setIsEditing(false)}
-            maxLength={1000}
-            autoFocus
-          />
-        ) : (
-          <div className="thread-node__text">
-            {renderContent(note.content)}
+      {/* Original Message */}
+      <div className="border-b border-border p-4">
+        <div className="group relative space-y-2">
+          <div className="absolute top-0 right-0 opacity-0 transition-opacity group-hover:opacity-100">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="ghost" className="h-7 w-7">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <Pin className="mr-2 h-4 w-4" />
+                  Pin note
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Bookmark className="mr-2 h-4 w-4" />
+                  Bookmark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => copyLink(rootNote.id)}>
+                  <Link2 className="mr-2 h-4 w-4" />
+                  Copy link
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsEditing(rootNote.id)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit note
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )}
-      </div>
 
-      <div className="thread-node__actions">
-        <button
-          className="thread-node__action"
-          onClick={() => setIsReplying(!isReplying)}
-        >
-          Reply
-        </button>
-        <button
-          className="thread-node__action"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          Edit
-        </button>
-        <button
-          className="thread-node__action thread-node__action--delete"
-          onClick={handleDelete}
-        >
-          Delete
-        </button>
-      </div>
+          {/* Tags */}
+          {rootNote.tags && rootNote.tags.length > 0 && (
+            <div className="flex gap-1.5">
+              {rootNote.tags.map((tag) => (
+                <span key={tag} className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
-      {isReplying && (
-        <div className="thread-node__reply-editor">
-          <NoteEditor
-            parentNote={note}
-            onSubmit={handleReply}
-            onCancel={() => setIsReplying(false)}
-            placeholder={`Reply to #${note.id}...`}
-            maxLength={1000}
-            autoFocus
-          />
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs">
+                #{rootNote.id}
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {getRelativeTime(rootNote.createdAt)}
+              </span>
+              {rootNote.bookmarked && (
+                <Bookmark className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+              )}
+            </div>
+            {rootNote.pinned && <Pin className="h-4 w-4 fill-primary text-primary" />}
+          </div>
+
+          {isEditing === rootNote.id ? (
+            <NoteEditor
+              initialContent={rootNote.content}
+              onSubmit={(content) => handleEdit(rootNote.id, content)}
+              onCancel={() => setIsEditing(null)}
+              maxLength={1000}
+              autoFocus
+            />
+          ) : (
+            <>
+              <p className="text-foreground text-sm leading-relaxed">
+                {renderContent(rootNote.content)}
+              </p>
+
+              {/* Image Previews */}
+              {rootNote.images && rootNote.images.length > 0 && (
+                <div className="space-y-2">
+                  {expandedImages[rootNote.id] ? (
+                    // Expanded: show all images
+                    <>
+                      {rootNote.images.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img}
+                          alt={`Image ${i + 1}`}
+                          className="w-full rounded-lg border border-border"
+                        />
+                      ))}
+                      <button
+                        onClick={() => toggleImageExpansion(rootNote.id)}
+                        className="text-primary text-xs hover:underline"
+                      >
+                        Collapse images
+                      </button>
+                    </>
+                  ) : (
+                    // Collapsed: thumbnail stack
+                    <button
+                      onClick={() => toggleImageExpansion(rootNote.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <div className="flex -space-x-2">
+                        {rootNote.images.slice(0, 3).map((img, i) => (
+                          <img
+                            key={i}
+                            src={img}
+                            alt={`Thumbnail ${i + 1}`}
+                            className="h-12 w-12 rounded border-2 border-background object-cover"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-muted-foreground text-xs">
+                        {rootNote.images.length} {rootNote.images.length === 1 ? 'image' : 'images'} - Click to expand
+                      </span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="text-muted-foreground text-xs">
+            {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
+          </div>
         </div>
-      )}
-
-      {isExpanded && children.length > 0 && (
-        <div className="thread-node__children">
-          {children.map((childNote) => {
-            const grandchildren = thread.filter((n: Note) => n.parentId === childNote.id);
-            return (
-              <ThreadNode
-                key={childNote.id}
-                note={childNote}
-                children={grandchildren}
-                thread={thread}
-                depth={depth + 1}
-                onReply={onReply}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onMentionClick={onMentionClick}
-                currentUserId={currentUserId}
-              />
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export const ThreadView: React.FC<ThreadViewProps> = ({
-  rootNote,
-  thread,
-  onReply,
-  onEdit,
-  onDelete,
-  currentUserId,
-}) => {
-  const navigate = useNavigate();
-
-  const handleMentionClick = useCallback((noteId: string) => {
-    navigate(`/notes/${noteId}`);
-    // NOTE: Highlight the note after navigation
-    setTimeout(() => {
-      const element = document.getElementById(`note-${noteId}`);
-      if (element) {
-        element.classList.add('thread-node--highlighted');
-        setTimeout(() => {
-          element.classList.remove('thread-node--highlighted');
-        }, 2000);
-      }
-    }, 300);
-  }, [navigate]);
-
-  // NOTE: Build thread tree structure
-  const threadTree = useMemo(() => {
-    const childrenMap = new Map<string, Note[]>();
-
-    thread.forEach((note) => {
-      if (note.parentId) {
-        const siblings = childrenMap.get(note.parentId) || [];
-        siblings.push(note);
-        childrenMap.set(note.parentId, siblings);
-      }
-    });
-
-    // NOTE: Sort children by timestamp (oldest to newest)
-    childrenMap.forEach((children) => {
-      children.sort((a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-    });
-
-    return childrenMap;
-  }, [thread]);
-
-  const rootChildren = threadTree.get(rootNote.id) || [];
-
-  return (
-    <div className="thread-view">
-      <div className="thread-view__header">
-        <h2>Thread</h2>
-        <span className="thread-view__count">
-          {thread.length} {thread.length === 1 ? 'note' : 'notes'}
-        </span>
       </div>
 
-      <div className="thread-view__content">
-        <ThreadNode
-          note={rootNote}
-          children={rootChildren}
-          thread={thread}
-          depth={0}
-          onReply={onReply}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onMentionClick={handleMentionClick}
-          currentUserId={currentUserId}
-        />
+      {/* Thread Replies */}
+      <ScrollArea className="flex-1">
+        <div className="space-y-3 p-4">
+          {replies.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="mb-4 rounded-full bg-accent p-4">
+                <Smile className="h-8 w-8 text-muted-foreground/50" />
+              </div>
+              <p className="font-medium text-foreground text-sm">No replies yet</p>
+              <p className="text-muted-foreground text-xs">Be the first to reply to this note</p>
+            </div>
+          ) : (
+            replies.map((note) => (
+              <div key={note.id} className="group relative space-y-2">
+                <div className="absolute top-0 right-0 opacity-0 transition-opacity group-hover:opacity-100">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-7 w-7">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Bookmark className="mr-2 h-4 w-4" />
+                        Bookmark
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => copyLink(note.id)}>
+                        <Link2 className="mr-2 h-4 w-4" />
+                        Copy link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setIsEditing(note.id)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit note
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(note.id)}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete note
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Tags */}
+                {note.tags && note.tags.length > 0 && (
+                  <div className="flex gap-1.5">
+                    {note.tags.map((tag) => (
+                      <span key={tag} className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs">
+                    #{note.id}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    {getRelativeTime(note.createdAt)}
+                  </span>
+                  {note.updatedAt && note.updatedAt !== note.createdAt && (
+                    <span className="text-muted-foreground text-xs">(edited)</span>
+                  )}
+                  {note.bookmarked && (
+                    <Bookmark className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                  )}
+                </div>
+
+                {isEditing === note.id ? (
+                  <NoteEditor
+                    initialContent={note.content}
+                    onSubmit={(content) => handleEdit(note.id, content)}
+                    onCancel={() => setIsEditing(null)}
+                    maxLength={1000}
+                    autoFocus
+                  />
+                ) : (
+                  <>
+                    <p className="text-foreground text-sm leading-relaxed">
+                      {renderContent(note.content)}
+                    </p>
+
+                    {/* Image Previews */}
+                    {note.images && note.images.length > 0 && (
+                      <div className="space-y-2">
+                        {expandedImages[note.id] ? (
+                          // Expanded: show all images
+                          <>
+                            {note.images.map((img, i) => (
+                              <img
+                                key={i}
+                                src={img}
+                                alt={`Image ${i + 1}`}
+                                className="w-full rounded-lg border border-border"
+                              />
+                            ))}
+                            <button
+                              onClick={() => toggleImageExpansion(note.id)}
+                              className="text-primary text-xs hover:underline"
+                            >
+                              Collapse images
+                            </button>
+                          </>
+                        ) : (
+                          // Collapsed: thumbnail stack
+                          <button
+                            onClick={() => toggleImageExpansion(note.id)}
+                            className="flex items-center gap-2"
+                          >
+                            <div className="flex -space-x-2">
+                              {note.images.slice(0, 3).map((img, i) => (
+                                <img
+                                  key={i}
+                                  src={img}
+                                  alt={`Thumbnail ${i + 1}`}
+                                  className="h-12 w-12 rounded border-2 border-background object-cover"
+                                />
+                              ))}
+                            </div>
+                            <span className="text-muted-foreground text-xs">
+                              {note.images.length} {note.images.length === 1 ? 'image' : 'images'} - Click to expand
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Reply Input */}
+      <div className="border-t border-border p-4">
+        <div className="flex items-end gap-2">
+          <div className="flex-1 rounded-lg border border-input bg-card">
+            <Input
+              placeholder="Reply..."
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleReply();
+                }
+              }}
+              className="border-0 bg-transparent focus-visible:ring-0"
+            />
+            <div className="flex items-center gap-1 px-3 pb-2">
+              <Button size="icon" variant="ghost" className="h-7 w-7">
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-7 w-7">
+                <Smile className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <Button size="icon" className="h-10 w-10 shrink-0" onClick={handleReply}>
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

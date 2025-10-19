@@ -14,9 +14,20 @@ export function getRelativeTime(timestamp: string): string {
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
 
-  if (diffMins < 1) return "just now"
-  if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`
-  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`
-  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`
-  return date.toLocaleDateString()
+  // NOTE: Absolute time (e.g., "8:34 AM")
+  const absolute = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit'
+  })
+
+  // NOTE: Relative time
+  let relative = ''
+  if (diffMins < 1) relative = "just now"
+  else if (diffMins < 60) relative = `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`
+  else if (diffHours < 24) relative = `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`
+  else if (diffDays < 7) relative = `${diffDays} day${diffDays === 1 ? "" : "s"} ago`
+  else relative = date.toLocaleDateString()
+
+  // NOTE: Combine absolute + relative (e.g., "8:34 AM (12 hours ago)")
+  return `${absolute} (${relative})`
 }

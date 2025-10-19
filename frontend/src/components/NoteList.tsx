@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { Hash, Plus, Search, MoreVertical, Trash2, Bookmark, Link2, Edit, Pin } from 'lucide-react';
+import { Hash, Search, MoreVertical, Trash2, Bookmark, Link2, Edit, Pin, Plus } from 'lucide-react';
 import { Note } from '../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { getRelativeTime } from '@/lib/utils';
+import NoteEditor from './NoteEditor';
 
 interface NoteListProps {
   notes: Note[];
@@ -15,6 +16,7 @@ interface NoteListProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   loading?: boolean;
+  onCreateNote?: (content: string) => Promise<void>;
 }
 
 export const NoteList: React.FC<NoteListProps> = ({
@@ -24,10 +26,12 @@ export const NoteList: React.FC<NoteListProps> = ({
   onLoadMore,
   hasMore = false,
   loading = false,
+  onCreateNote,
 }) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
 
   const filteredNotes = notes.filter((note) =>
     note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,6 +82,13 @@ export const NoteList: React.FC<NoteListProps> = ({
     navigator.clipboard.writeText(`${window.location.origin}?note=${noteId}`);
   };
 
+  const toggleImageExpansion = (noteId: string) => {
+    setExpandedImages((prev) => ({
+      ...prev,
+      [noteId]: !prev[noteId],
+    }));
+  };
+
   return (
     <div className="flex flex-1 flex-col bg-background">
       {/* Header */}
@@ -88,6 +99,9 @@ export const NoteList: React.FC<NoteListProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-xs">{filteredNotes.length} notes</span>
+          <Button size="icon" variant="ghost" className="h-8 w-8">
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -151,6 +165,17 @@ export const NoteList: React.FC<NoteListProps> = ({
               {/* Note Content */}
               <button onClick={() => handleNoteClick(note.id)} className="w-full text-left">
                 <div className="space-y-2">
+                  {/* Tags */}
+                  {note.tags && note.tags.length > 0 && (
+                    <div className="flex gap-1.5">
+                      {note.tags.map((tag) => (
+                        <span key={tag} className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Header with ID and Timestamp */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -165,7 +190,11 @@ export const NoteList: React.FC<NoteListProps> = ({
                           {note.replyCount}
                         </span>
                       )}
+                      {note.bookmarked && (
+                        <Bookmark className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                      )}
                     </div>
+                    {note.pinned && <Pin className="h-4 w-4 fill-primary text-primary" />}
                   </div>
 
                   {/* Content */}
@@ -173,6 +202,57 @@ export const NoteList: React.FC<NoteListProps> = ({
                     <p className="text-foreground text-sm leading-relaxed">
                       {truncateContent(note.content)}
                     </p>
+
+                    {/* Image Previews */}
+                    {note.images && note.images.length > 0 && (
+                      <div className="space-y-2">
+                        {expandedImages[note.id] ? (
+                          // Expanded: show all images
+                          <>
+                            {note.images.map((img, i) => (
+                              <img
+                                key={i}
+                                src={img}
+                                alt={`Image ${i + 1}`}
+                                className="w-full rounded-lg border border-border"
+                              />
+                            ))}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleImageExpansion(note.id);
+                              }}
+                              className="text-primary text-xs hover:underline"
+                            >
+                              Collapse images
+                            </button>
+                          </>
+                        ) : (
+                          // Collapsed: thumbnail stack
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleImageExpansion(note.id);
+                            }}
+                            className="flex items-center gap-2"
+                          >
+                            <div className="flex -space-x-2">
+                              {note.images.slice(0, 3).map((img, i) => (
+                                <img
+                                  key={i}
+                                  src={img}
+                                  alt={`Thumbnail ${i + 1}`}
+                                  className="h-12 w-12 rounded border-2 border-background object-cover"
+                                />
+                              ))}
+                            </div>
+                            <span className="text-muted-foreground text-xs">
+                              {note.images.length} {note.images.length === 1 ? 'image' : 'images'} - Click to expand
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </button>
@@ -202,6 +282,13 @@ export const NoteList: React.FC<NoteListProps> = ({
           )}
         </div>
       </ScrollArea>
+
+      {/* Note Editor at bottom */}
+      {onCreateNote && (
+        <div className="border-t border-border p-4">
+          <NoteEditor onSubmit={onCreateNote} placeholder="Message #notes" />
+        </div>
+      )}
     </div>
   );
 };
