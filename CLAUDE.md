@@ -44,6 +44,24 @@ specs/               # Feature specifications
 scripts/             # Development scripts
 ```
 
+## Environment Setup
+
+The application uses environment-specific configuration files:
+
+- `.env` - Development environment (default)
+- `.env.test` - Test environment (used when NODE_ENV=test)
+- `.env.example` - Template for reference
+
+**Environment Variables:**
+- `DATABASE_URL` - Path to SQLite database file (e.g., `data/notes.db` for dev, `data/test.db` for test)
+- `PORT` - Server port (default: 3000 for dev, 3001 for test)
+- `NODE_ENV` - Environment mode (`development`, `test`, `production`)
+
+**Setup:**
+1. Copy `.env.example` to `.env` for development
+2. Test environment automatically uses `.env.test` when running tests
+3. Config module (`backend/src/config/index.ts`) loads appropriate environment file
+
 ## Commands
 
 ```bash
@@ -53,14 +71,15 @@ bun run dev          # Start development server
 bun run build        # Build for production
 
 # Testing
-bun test            # Run unit tests with Vitest
+bun test            # Run unit tests with Vitest (uses test database)
 bun run test:e2e    # Run E2E tests with Playwright
 bun run test:load   # Run load tests
 
 # Database
-bun run db:setup    # Initialize SQLite database
-bun run db:migrate  # Run Drizzle migrations
-bun run db:seed     # Seed test data
+bun run db:setup         # Initialize SQLite database (development)
+bun run db:setup:test    # Initialize test database
+bun run db:migrate       # Run Drizzle migrations
+bun run db:seed          # Seed test data
 
 # Code Quality
 bun run lint        # Run ESLint

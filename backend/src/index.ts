@@ -1,6 +1,7 @@
 import app from './api/app';
+import { appConfig } from './config';
 
-const port = parseInt(process.env.PORT || '3000');
+const port = appConfig.port;
 
 console.log(`Server starting on port ${port}...`);
 

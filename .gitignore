@@ -36,6 +36,7 @@ __pycache__/
 
 # Environment files
 .env
+.env.test
 .env.local
 .env.*.local
 

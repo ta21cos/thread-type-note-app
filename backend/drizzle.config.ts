@@ -1,10 +1,16 @@
 import type { Config } from 'drizzle-kit';
 
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  throw new Error('DATABASE_URL is not set in the environment variables');
+}
+
 export default {
   schema: './src/models/*.schema.ts',
   out: './drizzle',
   driver: 'better-sqlite',
   dbCredentials: {
-    url: process.env.DATABASE_URL || 'data/notes.db',
+    url: DATABASE_URL,
   },
 } satisfies Config;

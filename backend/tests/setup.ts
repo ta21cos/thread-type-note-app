@@ -1,15 +1,23 @@
+import { unlink } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { appConfig } from '../src/config';
 import { Database } from 'bun:sqlite';
 import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { appConfig } from '../config';
 
-// NOTE: Database initialization script
-const dbPath = appConfig.databaseUrl;
+export async function setup() {
+  const dbPath = appConfig.databaseUrl;
 
-async function setup() {
+  // Delete existing test database if it exists
+  if (existsSync(dbPath)) {
+    await unlink(dbPath);
+    console.log(`✓ Removed existing test database: ${dbPath}`);
+  }
+
   // Create data directory if it doesn't exist
   await mkdir(dirname(dbPath), { recursive: true });
 
+  // Initialize fresh test database
   const db = new Database(dbPath);
 
   // Create tables
@@ -80,7 +88,9 @@ async function setup() {
   `);
 
   db.close();
-  console.log('✓ Database setup complete');
+  console.log(`✓ Test database initialized: ${dbPath}`);
 }
 
-setup().catch(console.error);
+export async function teardown() {
+  // Cleanup can be added here if needed
+}
