@@ -18,15 +18,14 @@ test.describe('View Thread', () => {
     await expect(page.locator(selectors.threadView.container)).toBeVisible();
 
     // NOTE: Verify thread header
-    await expect(page.locator('.thread-view__header')).toContainText('Thread');
+    await expect(page.locator('[data-testid="thread-view"] h3')).toContainText('Thread');
   });
 
   test('should show empty state when no note is selected', async ({ page }) => {
     await page.goto('/');
 
     // NOTE: Verify empty state is shown (before any note is selected)
-    await expect(page.locator('.notes-page__empty')).toBeVisible();
-    await expect(page.locator('.notes-page__empty')).toContainText('Select a note');
+    await expect(page.locator('text=Select a note to view its thread')).toBeVisible();
   });
 
   test('should display note content in thread view', async ({ page }) => {
@@ -95,7 +94,7 @@ test.describe('View Thread', () => {
     await expect(selectedNote).toContainText(note2Content);
   });
 
-  test('should show note count in thread header', async ({ page }) => {
+  test('should show reply count in thread', async ({ page }) => {
     await page.goto('/');
 
     // NOTE: Create root note with unique content
@@ -111,12 +110,11 @@ test.describe('View Thread', () => {
     await replyToNote({ page, content: reply1Content });
     await replyToNote({ page, content: reply2Content });
 
-    // NOTE: Verify note count (1 root + 2 replies = 3 notes)
-    const threadCount = page.locator('.thread-view__count');
-    await expect(threadCount).toContainText('3 notes');
+    // NOTE: Verify reply count shows "2 replies"
+    await expect(page.locator('text=2 replies')).toBeVisible();
   });
 
-  test('should display action buttons in thread', async ({ page }) => {
+  test('should display action menu in thread', async ({ page }) => {
     await page.goto('/');
 
     // NOTE: Create and select note with unique content
@@ -126,9 +124,16 @@ test.describe('View Thread', () => {
     await createNote(page, noteContent);
     await selectNoteByContent(page, noteContent);
 
-    // NOTE: Verify action buttons are present
-    await expect(page.locator(selectors.threadView.replyButton)).toBeVisible();
-    await expect(page.locator(selectors.threadView.editButton)).toBeVisible();
-    await expect(page.locator(selectors.threadView.deleteButton)).toBeVisible();
+    // NOTE: Verify reply input is visible
+    await expect(page.locator('[data-testid="thread-reply-input"]')).toBeVisible();
+
+    // NOTE: Open dropdown menu by hovering and clicking the three-dot button
+    const threadNode = page.locator('[data-testid="thread-node"]').first();
+    await threadNode.hover();
+    await threadNode.locator('button:has(svg)').click();
+
+    // NOTE: Verify edit and delete actions are in the menu
+    await expect(page.locator('[data-testid="thread-action-edit"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="thread-action-delete"]')).toBeVisible({ timeout: 5000 });
   });
 });
