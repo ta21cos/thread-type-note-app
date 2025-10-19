@@ -5,7 +5,7 @@ import { NoteList } from '../components/NoteList';
 import { ThreadView } from '../components/ThreadView';
 import { NoteEditor } from '../components/NoteEditor';
 import { SearchBar } from '../components/SearchBar';
-import { useInfiniteNotes, useNote, useCreateNote, useSearchNotes } from '../services/note.service';
+import { useInfiniteNotes, useNote, useCreateNote, useUpdateNote, useDeleteNote, useSearchNotes } from '../services/note.service';
 import { useNotesUI } from '../store/notes.store';
 import { useWebSocket } from '../services/websocket.service';
 
@@ -42,6 +42,8 @@ export const NotesPage: React.FC = () => {
 
   // NOTE: Create note mutation
   const createNote = useCreateNote();
+  const updateNote = useUpdateNote();
+  const deleteNote = useDeleteNote();
 
   // NOTE: Connect to WebSocket for real-time updates
   useWebSocket({
@@ -147,12 +149,24 @@ export const NotesPage: React.FC = () => {
                   });
                 }}
                 onEdit={async (noteId: string, content: string) => {
-                  // TODO: Implement edit functionality
-                  console.log('Edit note:', noteId, content);
+                  try {
+                    await updateNote.mutateAsync({ id: noteId, content });
+                  } catch (error) {
+                    console.error('Failed to update note:', error);
+                  }
                 }}
                 onDelete={async (noteId: string) => {
-                  // TODO: Implement delete functionality
-                  console.log('Delete note:', noteId);
+                  try {
+                    await deleteNote.mutateAsync(noteId);
+
+                    // NOTE: Clear selection if deleted note was selected
+                    if (selectedNoteId === noteId) {
+                      setSelectedNoteId(null);
+                      navigate('/');
+                    }
+                  } catch (error) {
+                    console.error('Failed to delete note:', error);
+                  }
                 }}
               />
             ) : noteLoading ? (
