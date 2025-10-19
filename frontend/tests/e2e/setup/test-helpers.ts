@@ -3,43 +3,43 @@ import { expect, Page } from '@playwright/test';
 // NOTE: Page object selectors for E2E tests
 
 export const selectors = {
-  // NOTE: Note Editor
+  // NOTE: Note Editor (using data-testid)
   noteEditor: {
-    textarea: '.note-editor__textarea',
-    submitButton: '.note-editor__button--submit',
-    cancelButton: '.note-editor__button--cancel',
-    charCount: '.note-editor__char-count',
-    error: '.note-editor__error',
+    textarea: '[data-testid="note-editor-textarea"]',
+    submitButton: '[data-testid="note-editor-submit"]',
+    cancelButton: '[data-testid="note-editor-cancel"]',
+    charCount: '[data-testid="note-editor-char-count"]',
+    error: '[data-testid="note-editor-error"]',
   },
 
-  // NOTE: Note List
+  // NOTE: Note List (using data-testid)
   noteList: {
-    container: '.note-list',
-    items: '.note-item',
-    itemContent: '.note-item__content',
-    itemId: '.note-item__id',
-    selected: '.note-item--selected',
-    empty: '.note-list__empty',
-    loading: '.note-list__loading',
+    container: '[data-testid="note-list"]',
+    items: '[data-testid="note-item"]',
+    itemContent: '[data-testid="note-item-content"]',
+    itemId: '[data-testid="note-item-id"]',
+    selected: '[data-testid="note-item"].bg-accent\\/50',
+    empty: '[data-testid="note-list-empty"]',
+    loading: '[data-testid="note-list-loading"]',
   },
 
-  // NOTE: Thread View
+  // NOTE: Thread View (using data-testid)
   threadView: {
-    container: '.thread-view',
-    node: '.thread-node',
-    nodeId: '.thread-node__id',
-    nodeContent: '.thread-node__text',
-    replyButton: '.thread-node__action:has-text("Reply")',
-    editButton: '.thread-node__action:has-text("Edit")',
-    deleteButton: '.thread-node__action--delete',
-    mention: '.thread-node__mention',
+    container: '[data-testid="thread-view"]',
+    node: '[data-testid="thread-node"]',
+    nodeId: '[data-testid="thread-node-id"]',
+    nodeContent: '[data-testid="thread-node-content"]',
+    replyButton: '[data-testid="thread-reply-submit"]',
+    editButton: '[data-testid="thread-action-edit"]',
+    deleteButton: '[data-testid="thread-action-delete"]',
+    mention: 'a.text-primary:has-text("@")',
   },
 
-  // NOTE: Search Bar
+  // NOTE: Search Bar (using data-testid)
   searchBar: {
-    input: '.search-bar__input',
-    clearButton: '.search-bar__clear',
-    status: '.search-bar__status',
+    input: '[data-testid="note-list-search"]',
+    clearButton: 'button:has-text("Clear")', // NOTE: No longer exists in new design
+    status: '[data-testid="note-list-count"]',
   },
 };
 
@@ -68,14 +68,11 @@ export async function createNote(page: Page, content: string): Promise<string> {
 
 export async function waitForNoteWithContent(page: Page, content: string, timeout: number = 5000) {
   await page.waitForFunction(
-    ({ contentText, selector }) => {
-      const notes = Array.from(document.querySelectorAll(selector));
-      return notes.some((note) => {
-        const contentEl = note.querySelector('.note-item__content');
-        return contentEl?.textContent?.includes(contentText);
-      });
+    ({ contentText }) => {
+      const contentElements = Array.from(document.querySelectorAll('[data-testid="note-item-content"]'));
+      return contentElements.some((el) => el.textContent?.includes(contentText));
     },
-    { contentText: content, selector: selectors.noteList.items },
+    { contentText: content },
     { timeout }
   );
 }
@@ -101,22 +98,18 @@ export async function replyToNote({
   page: Page;
   content: string;
 }): Promise<string> {
-  // NOTE: Click reply button on the first visible note in thread
-  await page.click(selectors.threadView.replyButton);
-
-  // NOTE: Wait for reply editor to appear
-  await page.waitForSelector(selectors.noteEditor.textarea);
-
   // NOTE: Listen for API response
   const responsePromise = page.waitForResponse(
     (response) => response.url().includes('/api/notes') && response.request().method() === 'POST',
     { timeout: 5000 }
   );
 
-  // NOTE: Fill and submit reply (scope to thread view to avoid main editor)
-  const threadView = page.locator(selectors.threadView.container);
-  await threadView.locator(selectors.noteEditor.textarea).fill(content);
-  await threadView.locator(selectors.noteEditor.submitButton).click();
+  // NOTE: Fill reply input (now at bottom of thread view)
+  const replyInput = page.locator('[data-testid="thread-reply-textarea"]');
+  await replyInput.fill(content);
+
+  // NOTE: Click send button
+  await page.click('[data-testid="thread-reply-submit"]');
 
   // NOTE: Wait for API response
   const response = await responsePromise;
@@ -126,7 +119,7 @@ export async function replyToNote({
   // NOTE: Wait for reply to appear in thread
   await page.waitForFunction(
     ({ contentText }) => {
-      const nodes = Array.from(document.querySelectorAll('.thread-node__text'));
+      const nodes = Array.from(document.querySelectorAll('[data-testid="thread-node-content"]'));
       return nodes.some((node) => node.textContent?.includes(contentText));
     },
     { contentText: content },
@@ -163,7 +156,8 @@ export async function searchNotes(page: Page, query: string) {
 }
 
 export async function clearSearch(page: Page) {
-  await page.click(selectors.searchBar.clearButton);
+  // NOTE: Clear by setting input value to empty (no clear button in new design)
+  await page.fill(selectors.searchBar.input, '');
 
   // NOTE: Wait for full list to return
   await page.waitForTimeout(500);
@@ -177,11 +171,24 @@ export async function deleteNote(page: Page) {
   // NOTE: Listen for API response
   const responsePromise = page.waitForResponse(
     (response) => response.url().includes('/api/notes/') && response.request().method() === 'DELETE',
-    { timeout: 5000 }
+    { timeout: 15000 }
   );
 
-  // NOTE: Click delete button
-  await page.click(selectors.threadView.deleteButton);
+  // NOTE: Hover over thread node to show menu button
+  const threadNode = page.locator('[data-testid="thread-node"]').first();
+  await threadNode.hover();
+
+  // NOTE: Find and click the dropdown menu button
+  const menuButton = threadNode.locator('button').first();
+  await menuButton.waitFor({ state: 'visible', timeout: 5000 });
+  await menuButton.click();
+
+  // NOTE: Wait for dropdown menu to be visible (portal rendered)
+  const deleteButton = page.locator('[data-testid="thread-action-delete"]');
+  await deleteButton.waitFor({ state: 'visible', timeout: 10000 });
+
+  // NOTE: Click delete menu item (force click as it might be in a portal/dropdown)
+  await deleteButton.click({ force: true });
 
   // NOTE: Wait for deletion to complete
   await responsePromise;
@@ -226,8 +233,8 @@ export async function verifyThreadNodeContent(page: Page, content: string, nodeI
 }
 
 export async function clickMentionLink(page: Page, noteId: string) {
-  await page.click(`.thread-node__mention:has-text("@${noteId}")`);
+  await page.click(`a:has-text("@${noteId}")`);
 
-  // NOTE: Wait for scroll animation
+  // NOTE: Wait for navigation
   await page.waitForTimeout(500);
 }

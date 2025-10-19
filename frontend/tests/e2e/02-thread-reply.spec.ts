@@ -68,12 +68,11 @@ test.describe('Thread Reply', () => {
     await page.waitForTimeout(2000); // Wait for refetch
 
     // NOTE: Find the parent note in the list and verify it has a reply indicator
-    const parentNote = page.locator('.note-item').filter({ hasText: rootContent });
-    const replyIndicator = parentNote.locator('.note-item__reply-indicator');
+    const parentNote = page.locator('[data-testid="note-item"]').filter({ hasText: rootContent });
+    const replyIndicator = parentNote.locator('[data-testid="note-item-reply-count"]');
 
     // NOTE: Just verify the indicator exists (don't check exact count due to parallel test runs)
     await expect(replyIndicator).toBeVisible({ timeout: 10000 });
-    await expect(replyIndicator).toContainText('repl'); // Contains "reply" or "replies"
   });
 
   test('should create multiple replies in a thread', async ({ page }) => {
@@ -107,36 +106,10 @@ test.describe('Thread Reply', () => {
     await expect(page.locator(selectors.threadView.nodeContent).filter({ hasText: reply2Content })).toBeVisible();
 
     // NOTE: Verify parent note shows reply indicator with multiple replies
-    const parentNote = page.locator('.note-item').filter({ hasText: rootContent });
-    const replyIndicator = parentNote.locator('.note-item__reply-indicator');
+    const parentNote = page.locator('[data-testid="note-item"]').filter({ hasText: rootContent });
+    const replyIndicator = parentNote.locator('[data-testid="note-item-reply-count"]');
     await expect(replyIndicator).toBeVisible({ timeout: 10000 });
-    // NOTE: Should contain "replies" (plural) since we created 2
-    await expect(replyIndicator).toContainText('replies');
-  });
-
-  test('should show cancel button in reply editor', async ({ page }) => {
-    await page.goto('/');
-
-    // NOTE: Create root note with unique content
-    const timestamp = Date.now();
-    const rootContent = `Test note for cancel ${timestamp}`;
-
-    await createNote(page, rootContent);
-
-    // NOTE: Select the note
-    await selectNoteByContent(page, rootContent);
-
-    // NOTE: Click reply button
-    await page.click(selectors.threadView.replyButton);
-
-    // NOTE: Verify cancel button is visible
-    await expect(page.locator(selectors.noteEditor.cancelButton)).toBeVisible();
-
-    // NOTE: Click cancel
-    await page.click(selectors.noteEditor.cancelButton);
-
-    // NOTE: Verify reply editor is closed (scope to thread view to avoid main editor)
-    const threadView = page.locator(selectors.threadView.container);
-    await expect(threadView.locator(selectors.noteEditor.textarea)).not.toBeVisible();
+    // NOTE: Reply count should show 2
+    await expect(replyIndicator).toHaveText('2');
   });
 });

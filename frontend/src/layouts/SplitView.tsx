@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 interface SplitViewProps {
   left: React.ReactNode;
@@ -159,22 +160,31 @@ export const SplitView: React.FC<SplitViewProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`split-view ${className} ${isDragging ? 'split-view--dragging' : ''}`}
+      className={cn(
+        'flex relative w-full h-full',
+        isDragging && 'select-none cursor-col-resize',
+        className
+      )}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
+      {/* Left Panel */}
       <div
         ref={leftPanelRef}
-        className="split-view__panel split-view__panel--left"
+        className="h-full overflow-hidden border-r border-border"
         style={{ width: `${splitPosition}%` }}
       >
-        <div className="split-view__content">
+        <div className="w-full h-full overflow-auto">
           {left}
         </div>
       </div>
 
+      {/* Divider */}
       <div
-        className="split-view__divider"
+        className={cn(
+          'w-2 h-full bg-secondary cursor-col-resize flex items-center justify-center transition-colors',
+          'hover:bg-accent relative'
+        )}
         onMouseDown={handleMouseDown}
         role="separator"
         aria-label="Resize panels"
@@ -190,30 +200,27 @@ export const SplitView: React.FC<SplitViewProps> = ({
           }
         }}
       >
-        <div className="split-view__divider-handle">
-          <div className="split-view__divider-dots">
-            <span />
-            <span />
-            <span />
-          </div>
+        <div className="h-10 flex flex-col items-center justify-center gap-0.5">
+          <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
+          <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
+          <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
         </div>
       </div>
 
+      {/* Right Panel */}
       <div
         ref={rightPanelRef}
-        className="split-view__panel split-view__panel--right"
+        className="h-full overflow-hidden"
         style={{ width: `${100 - splitPosition}%` }}
       >
-        <div className="split-view__content">
+        <div className="w-full h-full overflow-auto">
           {right}
         </div>
       </div>
 
       {/* NOTE: Keyboard shortcuts hint */}
-      <div className="split-view__shortcuts">
-        <span className="sr-only">
-          Keyboard shortcuts: Alt+Left/Right to resize, Alt+0 to reset, Alt+1/2 to focus panels
-        </span>
+      <div className="sr-only">
+        Keyboard shortcuts: Alt+Left/Right to resize, Alt+0 to reset, Alt+1/2 to focus panels
       </div>
     </div>
   );

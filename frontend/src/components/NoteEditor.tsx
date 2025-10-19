@@ -1,5 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Note } from '../../../shared/types';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 interface NoteEditorProps {
   initialContent?: string;
@@ -35,14 +38,6 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       textareaRef.current.focus();
     }
   }, [autoFocus]);
-
-  // NOTE: Auto-resize textarea based on content
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [content]);
 
   const handleContentChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -113,28 +108,31 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
     [onCancel]
   );
 
-  const insertMention = useCallback((noteId: string) => {
-    if (!textareaRef.current) return;
+  const insertMention = useCallback(
+    (noteId: string) => {
+      if (!textareaRef.current) return;
 
-    const beforeCursor = content.slice(0, cursorPosition);
-    const afterCursor = content.slice(cursorPosition);
+      const beforeCursor = content.slice(0, cursorPosition);
+      const afterCursor = content.slice(cursorPosition);
 
-    // NOTE: Replace the partial mention with complete one
-    const beforeWithoutPartial = beforeCursor.replace(/@\w*$/, '');
-    const newContent = `${beforeWithoutPartial}@${noteId} ${afterCursor}`;
+      // NOTE: Replace the partial mention with complete one
+      const beforeWithoutPartial = beforeCursor.replace(/@\w*$/, '');
+      const newContent = `${beforeWithoutPartial}@${noteId} ${afterCursor}`;
 
-    setContent(newContent);
+      setContent(newContent);
 
-    // NOTE: Move cursor after the mention
-    setTimeout(() => {
-      if (textareaRef.current) {
-        const newPosition = beforeWithoutPartial.length + noteId.length + 2;
-        textareaRef.current.selectionStart = newPosition;
-        textareaRef.current.selectionEnd = newPosition;
-        textareaRef.current.focus();
-      }
-    }, 0);
-  }, [content, cursorPosition]);
+      // NOTE: Move cursor after the mention
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newPosition = beforeWithoutPartial.length + noteId.length + 2;
+          textareaRef.current.selectionStart = newPosition;
+          textareaRef.current.selectionEnd = newPosition;
+          textareaRef.current.focus();
+        }
+      }, 0);
+    },
+    [content, cursorPosition]
+  );
 
   // NOTE: Expose insertMention function to parent component
   useEffect(() => {
@@ -144,67 +142,76 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   }, [onMentionInsert, insertMention]);
 
   return (
-    <div className="note-editor">
+    <div className="space-y-3" data-testid="note-editor">
       {parentNote && (
-        <div className="note-editor__reply-context">
-          <span className="note-editor__reply-label">Replying to #{parentNote.id}</span>
-          <div className="note-editor__reply-preview">
+        <div className="rounded-lg bg-accent p-3">
+          <span className="block text-muted-foreground text-xs mb-1">
+            Replying to #{parentNote.id}
+          </span>
+          <div className="text-foreground text-sm">
             {parentNote.content.substring(0, 100)}
             {parentNote.content.length > 100 && '...'}
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="note-editor__form">
-        <div className="note-editor__input-wrapper">
-          <textarea
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="space-y-2">
+          <Textarea
             ref={textareaRef}
             value={content}
             onChange={handleContentChange}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className={`note-editor__textarea ${error ? 'note-editor__textarea--error' : ''}`}
+            className={cn(
+              'min-h-20 resize-none',
+              error && 'border-destructive focus-visible:ring-destructive'
+            )}
             disabled={isSubmitting}
             rows={3}
+            data-testid="note-editor-textarea"
           />
 
-          <div className="note-editor__footer">
-            <div className="note-editor__char-count">
-              <span className={content.length > maxLength * 0.9 ? 'text-warning' : ''}>
+          <div className="flex items-center justify-between">
+            <div className="text-muted-foreground text-xs" data-testid="note-editor-char-count">
+              <span className={cn(content.length > maxLength * 0.9 && 'text-warning')}>
                 {content.length} / {maxLength}
               </span>
             </div>
 
-            <div className="note-editor__actions">
+            <div className="flex items-center gap-2">
               {onCancel && (
-                <button
+                <Button
                   type="button"
                   onClick={onCancel}
-                  className="note-editor__button note-editor__button--cancel"
+                  variant="outline"
+                  size="sm"
                   disabled={isSubmitting}
+                  data-testid="note-editor-cancel"
                 >
                   Cancel
-                </button>
+                </Button>
               )}
 
-              <button
+              <Button
                 type="submit"
-                className="note-editor__button note-editor__button--submit"
+                size="sm"
                 disabled={isSubmitting || !content.trim() || content.length > maxLength}
+                data-testid="note-editor-submit"
               >
                 {isSubmitting ? 'Saving...' : parentNote ? 'Reply' : 'Create Note'}
-              </button>
+              </Button>
             </div>
           </div>
 
           {error && (
-            <div className="note-editor__error">
+            <div className="text-destructive text-sm" data-testid="note-editor-error">
               {error}
             </div>
           )}
         </div>
 
-        <div className="note-editor__hints">
+        <div className="text-muted-foreground text-xs">
           <span>Tip: Use @ID to mention other notes • Press Cmd/Ctrl+Enter to submit</span>
         </div>
       </form>
