@@ -141,7 +141,10 @@ export const NotesPage: React.FC = () => {
                 rootNote={noteData.note}
                 thread={noteData.thread || []}
                 onReply={async (parentId: string, content: string) => {
-                  await handleCreateNote(content);
+                  await createNote.mutateAsync({
+                    content,
+                    parentId,
+                  });
                 }}
                 onEdit={async (noteId: string, content: string) => {
                   // TODO: Implement edit functionality
