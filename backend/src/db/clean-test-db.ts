@@ -1,16 +1,25 @@
 import { Database } from 'bun:sqlite';
+import { config } from 'dotenv';
+import path from 'path';
 
-// NOTE: Script to clean test database for E2E tests using direct SQL
-const DATABASE_URL = process.env.DATABASE_URL || 'backend/data/test.db';
+// NOTE: Load .env.test for test environment
+const envPath = path.resolve(process.cwd(), '.env.test');
+config({ path: envPath });
+
+// NOTE: Clean test database for E2E tests using direct SQL
+const DATABASE_URL = process.env.DATABASE_URL;
 
 function cleanDatabase() {
+  if (!DATABASE_URL) {
+    throw new Error('DATABASE_URL is not set');
+  }
+
   console.log('Cleaning test database...');
 
   const sqlite = new Database(DATABASE_URL);
 
   try {
-    // NOTE: Delete in proper order using raw SQL - child tables first
-    // Wrap each in try-catch to handle tables that might not exist yet
+    // NOTE: Delete in proper order - child tables first
     try {
       sqlite.run('DELETE FROM search_index');
     } catch (e) {
@@ -38,7 +47,6 @@ function cleanDatabase() {
 
     console.log('✓ Test database cleaned');
     sqlite.close();
-    process.exit(0);
   } catch (error) {
     console.error('Error cleaning database:', error);
     sqlite.close();
@@ -46,4 +54,5 @@ function cleanDatabase() {
   }
 }
 
+// NOTE: Execute when run as a script
 cleanDatabase();

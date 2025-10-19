@@ -9,11 +9,13 @@
   ],
   "scripts": {
     "dev": "bun run --filter @thread-note/backend dev & bun run --filter @thread-note/frontend dev",
+    "dev:test": "bun run --filter @thread-note/backend dev:test & bun run --filter @thread-note/frontend dev:test",
     "build": "bun run --filter @thread-note/backend build && bun run --filter @thread-note/frontend build",
     "test": "bun test",
     "test:e2e": "bun run --filter @thread-note/frontend test:e2e",
     "test:load": "bun run --filter @thread-note/backend test:load",
     "db:setup": "bun run --filter @thread-note/backend db:setup",
+    "db:setup:test": "bun run --filter @thread-note/backend db:setup:test",
     "db:migrate": "bun run --filter @thread-note/backend db:migrate",
     "db:seed": "bun run --filter @thread-note/backend db:seed",
     "lint": "bun run --filter '*' lint",
