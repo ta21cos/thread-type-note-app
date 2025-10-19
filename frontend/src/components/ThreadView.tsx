@@ -225,7 +225,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
       <div className="thread-view__header">
         <h2>Thread</h2>
         <span className="thread-view__count">
-          {thread.length + 1} {thread.length === 0 ? 'note' : 'notes'}
+          {thread.length} {thread.length === 1 ? 'note' : 'notes'}
         </span>
       </div>
 
