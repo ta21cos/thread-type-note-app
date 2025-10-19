@@ -28,17 +28,10 @@ test.describe('Create Note', () => {
     const uniqueContent = `Note with ID ${Date.now()}`;
     const noteId = await createNote(page, uniqueContent);
 
-    // NOTE: Find the note in the list
-    const noteItem = page.locator(selectors.noteList.itemContent).filter({ hasText: uniqueContent }).locator('..');
-    const noteIdElement = noteItem.locator(selectors.noteList.itemId);
-
-    // NOTE: Verify note ID is displayed
+    // NOTE: Verify note ID is visible and has correct format (6 characters)
+    const noteIdElement = page.locator(selectors.noteList.itemId, { hasText: `#${noteId}` });
     await expect(noteIdElement).toBeVisible();
-
-    // NOTE: Verify ID format (6 characters) and matches returned ID
-    const noteIdText = await noteIdElement.textContent();
-    expect(noteIdText).toMatch(/#[a-zA-Z0-9]{6}/);
-    expect(noteIdText).toBe(`#${noteId}`);
+    await expect(noteIdElement).toHaveText(/#[a-zA-Z0-9]{6}/);
   });
 
   test('should not submit empty note', async ({ page }) => {

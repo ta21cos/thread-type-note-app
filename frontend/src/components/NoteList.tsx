@@ -4,7 +4,12 @@ import { Note } from '../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { getRelativeTime } from '@/lib/utils';
 import NoteEditor from './NoteEditor';
@@ -33,9 +38,10 @@ export const NoteList: React.FC<NoteListProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
 
-  const filteredNotes = notes.filter((note) =>
-    note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.id.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // NOTE: Infinite scroll implementation
@@ -90,7 +96,7 @@ export const NoteList: React.FC<NoteListProps> = ({
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-background">
+    <div className="flex flex-1 flex-col bg-background" data-testid="note-list">
       {/* Header */}
       <div className="flex h-14 items-center justify-between border-b border-border px-4">
         <div className="flex items-center gap-2">
@@ -98,7 +104,9 @@ export const NoteList: React.FC<NoteListProps> = ({
           <h1 className="font-semibold text-foreground text-lg">notes</h1>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs">{filteredNotes.length} notes</span>
+          <span className="text-muted-foreground text-xs" data-testid="note-list-count">
+            {filteredNotes.length} notes
+          </span>
           <Button size="icon" variant="ghost" className="h-8 w-8">
             <Plus className="h-4 w-4" />
           </Button>
@@ -114,6 +122,7 @@ export const NoteList: React.FC<NoteListProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
+            data-testid="note-list-search"
           />
         </div>
       </div>
@@ -128,6 +137,7 @@ export const NoteList: React.FC<NoteListProps> = ({
                 'group relative w-full rounded-lg px-4 py-3 transition-colors hover:bg-accent',
                 selectedNoteId === note.id && 'bg-accent/50'
               )}
+              data-testid="note-item"
             >
               {/* Action Menu */}
               <div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
@@ -169,7 +179,10 @@ export const NoteList: React.FC<NoteListProps> = ({
                   {note.tags && note.tags.length > 0 && (
                     <div className="flex gap-1.5">
                       {note.tags.map((tag) => (
-                        <span key={tag} className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+                        <span
+                          key={tag}
+                          className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -179,14 +192,20 @@ export const NoteList: React.FC<NoteListProps> = ({
                   {/* Header with ID and Timestamp */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs">
+                      <span
+                        className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs"
+                        data-testid="note-item-id"
+                      >
                         #{note.id}
                       </span>
                       <span className="text-muted-foreground text-xs">
                         {getRelativeTime(note.createdAt)}
                       </span>
                       {note.replyCount !== undefined && note.replyCount > 0 && (
-                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/20 px-1.5 font-medium text-primary text-xs">
+                        <span
+                          className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/20 px-1.5 font-medium text-primary text-xs"
+                          data-testid="note-item-reply-count"
+                        >
                           {note.replyCount}
                         </span>
                       )}
@@ -199,7 +218,10 @@ export const NoteList: React.FC<NoteListProps> = ({
 
                   {/* Content */}
                   <div className="space-y-2">
-                    <p className="text-foreground text-sm leading-relaxed">
+                    <p
+                      className="text-foreground text-sm leading-relaxed"
+                      data-testid="note-item-content"
+                    >
                       {truncateContent(note.content)}
                     </p>
 
@@ -247,7 +269,8 @@ export const NoteList: React.FC<NoteListProps> = ({
                               ))}
                             </div>
                             <span className="text-muted-foreground text-xs">
-                              {note.images.length} {note.images.length === 1 ? 'image' : 'images'} - Click to expand
+                              {note.images.length} {note.images.length === 1 ? 'image' : 'images'} -
+                              Click to expand
                             </span>
                           </button>
                         )}
@@ -261,7 +284,10 @@ export const NoteList: React.FC<NoteListProps> = ({
 
           {/* Loading State */}
           {loading && (
-            <div className="flex items-center justify-center gap-2 p-4">
+            <div
+              className="flex items-center justify-center gap-2 p-4"
+              data-testid="note-list-loading"
+            >
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               <span className="text-muted-foreground text-sm">Loading more notes...</span>
             </div>
@@ -272,12 +298,17 @@ export const NoteList: React.FC<NoteListProps> = ({
 
           {/* Empty State */}
           {!loading && filteredNotes.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-2 p-8">
+            <div
+              className="flex flex-col items-center justify-center gap-2 p-8"
+              data-testid="note-list-empty"
+            >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
                 <Hash className="h-6 w-6 text-muted-foreground" />
               </div>
               <p className="text-foreground text-sm">No notes yet</p>
-              <p className="text-muted-foreground text-xs">Create your first note to get started!</p>
+              <p className="text-muted-foreground text-xs">
+                Create your first note to get started!
+              </p>
             </div>
           )}
         </div>

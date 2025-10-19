@@ -1,11 +1,27 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Send, Smile, Paperclip, MoreVertical, Trash2, Bookmark, Link2, Edit, Pin } from 'lucide-react';
+import {
+  X,
+  Send,
+  Smile,
+  Paperclip,
+  MoreVertical,
+  Trash2,
+  Bookmark,
+  Link2,
+  Edit,
+  Pin,
+} from 'lucide-react';
 import { Note } from '../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { getRelativeTime } from '@/lib/utils';
 import NoteEditor from './NoteEditor';
 
@@ -91,7 +107,10 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
   }, [thread, rootNote.id]);
 
   return (
-    <div className="flex w-full flex-col border-l border-border bg-background">
+    <div
+      className="flex w-full flex-col border-l border-border bg-background"
+      data-testid="thread-view"
+    >
       {/* Header */}
       <div className="flex h-14 items-center justify-between border-b border-border px-4">
         <h3 className="font-semibold text-foreground text-sm">Thread</h3>
@@ -102,7 +121,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
 
       {/* Original Message */}
       <div className="border-b border-border p-4">
-        <div className="group relative space-y-2">
+        <div className="group relative space-y-2" data-testid="thread-node">
           <div className="absolute top-0 right-0 opacity-0 transition-opacity group-hover:opacity-100">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -123,9 +142,20 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                   <Link2 className="mr-2 h-4 w-4" />
                   Copy link
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsEditing(rootNote.id)}>
+                <DropdownMenuItem
+                  onClick={() => setIsEditing(rootNote.id)}
+                  data-testid="thread-action-edit"
+                >
                   <Edit className="mr-2 h-4 w-4" />
                   Edit note
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleDelete(rootNote.id)}
+                  className="text-destructive"
+                  data-testid="thread-action-delete"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete note
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -135,7 +165,10 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
           {rootNote.tags && rootNote.tags.length > 0 && (
             <div className="flex gap-1.5">
               {rootNote.tags.map((tag) => (
-                <span key={tag} className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+                <span
+                  key={tag}
+                  className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs"
+                >
                   {tag}
                 </span>
               ))}
@@ -144,7 +177,10 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
 
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs">
+              <span
+                className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs"
+                data-testid="thread-node-id"
+              >
                 #{rootNote.id}
               </span>
               <span className="text-muted-foreground text-xs">
@@ -167,7 +203,10 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
             />
           ) : (
             <>
-              <p className="text-foreground text-sm leading-relaxed">
+              <p
+                className="text-foreground text-sm leading-relaxed"
+                data-testid="thread-node-content"
+              >
                 {renderContent(rootNote.content)}
               </p>
 
@@ -209,7 +248,8 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                         ))}
                       </div>
                       <span className="text-muted-foreground text-xs">
-                        {rootNote.images.length} {rootNote.images.length === 1 ? 'image' : 'images'} - Click to expand
+                        {rootNote.images.length} {rootNote.images.length === 1 ? 'image' : 'images'}{' '}
+                        - Click to expand
                       </span>
                     </button>
                   )}
@@ -237,7 +277,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
             </div>
           ) : (
             replies.map((note) => (
-              <div key={note.id} className="group relative space-y-2">
+              <div key={note.id} className="group relative space-y-2" data-testid="thread-node">
                 <div className="absolute top-0 right-0 opacity-0 transition-opacity group-hover:opacity-100">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -254,13 +294,17 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                         <Link2 className="mr-2 h-4 w-4" />
                         Copy link
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setIsEditing(note.id)}>
+                      <DropdownMenuItem
+                        onClick={() => setIsEditing(note.id)}
+                        data-testid="thread-action-edit"
+                      >
                         <Edit className="mr-2 h-4 w-4" />
                         Edit note
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleDelete(note.id)}
                         className="text-destructive"
+                        data-testid="thread-action-delete"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete note
@@ -273,7 +317,10 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                 {note.tags && note.tags.length > 0 && (
                   <div className="flex gap-1.5">
                     {note.tags.map((tag) => (
-                      <span key={tag} className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
+                      <span
+                        key={tag}
+                        className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -281,7 +328,10 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                 )}
 
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs">
+                  <span
+                    className="rounded bg-primary/10 px-2 py-0.5 font-mono font-medium text-primary text-xs"
+                    data-testid="thread-node-id"
+                  >
                     #{note.id}
                   </span>
                   <span className="text-muted-foreground text-xs">
@@ -305,7 +355,10 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                   />
                 ) : (
                   <>
-                    <p className="text-foreground text-sm leading-relaxed">
+                    <p
+                      className="text-foreground text-sm leading-relaxed"
+                      data-testid="thread-node-content"
+                    >
                       {renderContent(note.content)}
                     </p>
 
@@ -347,7 +400,8 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                               ))}
                             </div>
                             <span className="text-muted-foreground text-xs">
-                              {note.images.length} {note.images.length === 1 ? 'image' : 'images'} - Click to expand
+                              {note.images.length} {note.images.length === 1 ? 'image' : 'images'} -
+                              Click to expand
                             </span>
                           </button>
                         )}
@@ -362,7 +416,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
       </ScrollArea>
 
       {/* Reply Input */}
-      <div className="border-t border-border p-4">
+      <div className="border-t border-border p-4" data-testid="thread-reply-input">
         <div className="flex items-end gap-2">
           <div className="flex-1 rounded-lg border border-input bg-card">
             <Input
@@ -376,6 +430,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
                 }
               }}
               className="border-0 bg-transparent focus-visible:ring-0"
+              data-testid="thread-reply-textarea"
             />
             <div className="flex items-center gap-1 px-3 pb-2">
               <Button size="icon" variant="ghost" className="h-7 w-7">
@@ -386,7 +441,12 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
               </Button>
             </div>
           </div>
-          <Button size="icon" className="h-10 w-10 shrink-0" onClick={handleReply}>
+          <Button
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={handleReply}
+            data-testid="thread-reply-submit"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
