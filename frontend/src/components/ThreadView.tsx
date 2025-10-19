@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Note } from '../../../shared/types';
 import NoteEditor from './NoteEditor';
 
@@ -19,6 +20,7 @@ interface ThreadNodeProps {
   onReply: (parentId: string, content: string) => Promise<void>;
   onEdit: (noteId: string, content: string) => Promise<void>;
   onDelete: (noteId: string) => Promise<void>;
+  onMentionClick: (noteId: string) => void;
   currentUserId?: string;
 }
 
@@ -30,6 +32,7 @@ const ThreadNode: React.FC<ThreadNodeProps> = ({
   onReply,
   onEdit,
   onDelete,
+  onMentionClick,
   currentUserId,
 }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -70,7 +73,7 @@ const ThreadNode: React.FC<ThreadNodeProps> = ({
             className="thread-node__mention"
             onClick={(e) => {
               e.preventDefault();
-              // NOTE: Scroll to mentioned note if in view
+              // NOTE: Scroll to mentioned note if in current thread
               const element = document.getElementById(`note-${noteId}`);
               if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -78,6 +81,9 @@ const ThreadNode: React.FC<ThreadNodeProps> = ({
                 setTimeout(() => {
                   element.classList.remove('thread-node--highlighted');
                 }, 2000);
+              } else {
+                // NOTE: Navigate to mentioned note if not in current thread
+                onMentionClick(noteId);
               }
             }}
           >
@@ -178,6 +184,7 @@ const ThreadNode: React.FC<ThreadNodeProps> = ({
                 onReply={onReply}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onMentionClick={onMentionClick}
                 currentUserId={currentUserId}
               />
             );
@@ -196,6 +203,22 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
   onDelete,
   currentUserId,
 }) => {
+  const navigate = useNavigate();
+
+  const handleMentionClick = useCallback((noteId: string) => {
+    navigate(`/notes/${noteId}`);
+    // NOTE: Highlight the note after navigation
+    setTimeout(() => {
+      const element = document.getElementById(`note-${noteId}`);
+      if (element) {
+        element.classList.add('thread-node--highlighted');
+        setTimeout(() => {
+          element.classList.remove('thread-node--highlighted');
+        }, 2000);
+      }
+    }, 300);
+  }, [navigate]);
+
   // NOTE: Build thread tree structure
   const threadTree = useMemo(() => {
     const childrenMap = new Map<string, Note[]>();
@@ -238,6 +261,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
           onReply={onReply}
           onEdit={onEdit}
           onDelete={onDelete}
+          onMentionClick={handleMentionClick}
           currentUserId={currentUserId}
         />
       </div>
