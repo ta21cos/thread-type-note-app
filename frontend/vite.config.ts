@@ -8,11 +8,13 @@ export default defineConfig(({ mode }) => {
     throw new Error('Env file is not loaded');
   }
 
+  const port = mode === 'test' ? 5174 : 5173;
+
   return {
     plugins: [react()],
     logLevel: 'info',
     server: {
-      port: 5173,
+      port,
       proxy: {
         '/api': {
           target: env.VITE_BACKEND_API_ENDPOINT,

@@ -53,6 +53,8 @@ coverage/
 htmlcov/
 .pytest_cache/
 .tox/
+playwright-report/
+test-results/
 
 # Database
 *.db
