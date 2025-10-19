@@ -50,7 +50,11 @@ export const NotesUIProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, []);
 
   const setSearchQuery = useCallback((query: string) => {
-    setState((prev) => ({ ...prev, searchQuery: query }));
+    setState((prev) => ({
+      ...prev,
+      searchQuery: query,
+      isSearchOpen: query.length > 0  // NOTE: Auto-open search when typing
+    }));
   }, []);
 
   const startEditing = useCallback((noteId: string) => {

@@ -4,28 +4,17 @@ import type { Note } from '../db';
 // NOTE: Repository for FTS5 full-text search
 export class SearchRepository {
   async searchByContent(query: string, limit: number = 20): Promise<Note[]> {
-    // NOTE: FTS5 search using notes_fts virtual table
-    const searchQuery = sqlite.query<{ note_id: string }, [string, number]>(`
-      SELECT note_id FROM notes_fts
-      WHERE content MATCH ?
+    // NOTE: Use LIKE for substring matching (case-insensitive)
+    // FTS5 MATCH only supports prefix matching, not substring
+    const likePattern = `%${query}%`;
+
+    const searchQuery = sqlite.query<Note, [string, number]>(`
+      SELECT * FROM notes
+      WHERE LOWER(content) LIKE LOWER(?)
       LIMIT ?
     `);
 
-    const results = searchQuery.all(query, limit);
-
-    if (!results || results.length === 0) {
-      return [];
-    }
-
-    const noteIds = results.map((r) => r.note_id);
-
-    // Fetch full notes
-    const notesQuery = sqlite.query<Note, string[]>(`
-      SELECT * FROM notes
-      WHERE id IN (${noteIds.map(() => '?').join(',')})
-    `);
-
-    const notes = notesQuery.all(...noteIds);
+    const notes = searchQuery.all(likePattern, limit);
 
     // NOTE: Convert Date objects to ISO strings for serialization
     return notes.map(note => ({

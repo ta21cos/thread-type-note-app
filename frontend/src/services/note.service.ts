@@ -85,7 +85,7 @@ export const useNote = (id: string | undefined) => {
   });
 };
 
-// NOTE: Search notes
+// NOTE: Search notes with debouncing
 export const useSearchNotes = (query: string, type: 'content' | 'mention' = 'content') => {
   return useQuery({
     queryKey: noteKeys.search(query, type),
@@ -94,7 +94,8 @@ export const useSearchNotes = (query: string, type: 'content' | 'mention' = 'con
       return response;
     },
     enabled: query.length > 0,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 30, // NOTE: 30 seconds - cache search results
+    gcTime: 1000 * 60 * 5, // NOTE: 5 minutes - keep unused queries in cache
   });
 };
 

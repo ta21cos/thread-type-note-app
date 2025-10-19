@@ -1,11 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SplitView } from '../layouts/SplitView';
 import { NoteList } from '../components/NoteList';
 import { ThreadView } from '../components/ThreadView';
 import { NoteEditor } from '../components/NoteEditor';
 import { SearchBar } from '../components/SearchBar';
-import { useInfiniteNotes, useNote, useCreateNote, useUpdateNote, useDeleteNote, useSearchNotes } from '../services/note.service';
+import {
+  useInfiniteNotes,
+  useNote,
+  useCreateNote,
+  useUpdateNote,
+  useDeleteNote,
+  useSearchNotes,
+} from '../services/note.service';
 import { useNotesUI } from '../store/notes.store';
 
 export const NotesPage: React.FC = () => {
@@ -21,6 +28,17 @@ export const NotesPage: React.FC = () => {
     stopReply,
   } = useNotesUI();
 
+  // NOTE: Debounced search query (300ms delay after user stops typing)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // NOTE: Fetch notes with infinite scroll
   const {
     data: notesData,
@@ -33,9 +51,9 @@ export const NotesPage: React.FC = () => {
   // NOTE: Fetch selected note with thread
   const { data: noteData, isLoading: noteLoading } = useNote(selectedNoteId ?? undefined);
 
-  // NOTE: Search notes
+  // NOTE: Search notes with debounced query
   const { data: searchData, isLoading: searchLoading } = useSearchNotes(
-    searchQuery,
+    debouncedSearchQuery,
     'content'
   );
 
@@ -95,6 +113,8 @@ export const NotesPage: React.FC = () => {
   const allNotes = notesData?.pages.flatMap((page) => page.notes) || [];
 
   // NOTE: Display search results or all notes
+  // When searching, always show search results (even if empty during debounce)
+  // This prevents flashing all notes during the debounce period
   const displayNotes = isSearchOpen && searchQuery
     ? searchData?.results || []
     : allNotes;
