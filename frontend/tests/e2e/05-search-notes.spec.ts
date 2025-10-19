@@ -18,38 +18,42 @@ test.describe('Search Notes', () => {
   test('should filter notes by content', async ({ page }) => {
     await page.goto('/');
 
-    // NOTE: Create notes with unique identifiable content
-    const timestamp = Date.now();
-    const searchTerm = `UniqueSearch${timestamp}`;
+    // NOTE: Create notes with unique identifiable content (using random to ensure uniqueness across parallel tests)
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const searchTerm = `UniqueSearch_${uniqueId}`;
     const note1 = `${searchTerm} JavaScript is awesome`;
-    const note2 = `Python is great ${timestamp}`;
-    const note3 = `TypeScript rocks ${timestamp}`;
+    const note2 = `Python is great ${uniqueId}`;
+    const note3 = `TypeScript rocks ${uniqueId}`;
 
     await createNote(page, note1);
     await createNote(page, note2);
     await createNote(page, note3);
 
+    // NOTE: Wait for all notes to be created
+    await verifyNoteExists(page, note1);
+
     // NOTE: Search for unique term
     await searchNotes(page, searchTerm);
 
     // NOTE: Verify only matching note is displayed
-    await verifyNoteExists(page, note1);
+    await expect(
+      page.locator(selectors.noteList.itemContent).filter({ hasText: note1 })
+    ).toBeVisible();
 
-    // NOTE: Verify non-matching notes are not visible
+    // NOTE: Verify only one note is shown
     const allVisibleNotes = page.locator(selectors.noteList.itemContent);
-    const count = await allVisibleNotes.count();
-    expect(count).toBe(1);
+    await expect(allVisibleNotes).toHaveCount(1);
   });
 
   test('should show all notes when search is cleared', async ({ page }) => {
     await page.goto('/');
 
     // NOTE: Create multiple notes with unique content
-    const timestamp = Date.now();
-    const searchTerm = `Searchable${timestamp}`;
+    const uniqueId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const searchTerm = `Searchable_${uniqueId}`;
     const note1 = `${searchTerm} First note`;
-    const note2 = `Second note ${timestamp}`;
-    const note3 = `Third note ${timestamp}`;
+    const note2 = `Second note ${uniqueId}`;
+    const note3 = `Third note ${uniqueId}`;
 
     await createNote(page, note1);
     await createNote(page, note2);
@@ -71,21 +75,32 @@ test.describe('Search Notes', () => {
     await verifyNoteExists(page, note3);
   });
 
-  test('should display search query in status', async ({ page }) => {
+  test('should update note count when searching', async ({ page }) => {
     await page.goto('/');
 
-    // NOTE: Create a note with unique content
+    // NOTE: Create notes with unique content
     const timestamp = Date.now();
     const searchQuery = `SearchStatus${timestamp}`;
-    const noteContent = `Test content with ${searchQuery}`;
+    const note1 = `Test content with ${searchQuery}`;
+    const note2 = `Other note ${timestamp}`;
 
-    await createNote(page, noteContent);
+    await createNote(page, note1);
+    await createNote(page, note2);
+
+    // NOTE: Wait for notes to be visible
+    await verifyNoteExists(page, note1);
+    await verifyNoteExists(page, note2);
 
     // NOTE: Perform search
     await searchNotes(page, searchQuery);
 
-    // NOTE: Verify search status shows query
-    await expect(page.locator(selectors.searchBar.status)).toContainText(searchQuery);
+    // NOTE: Verify only one note is shown
+    const visibleNotes = page.locator(selectors.noteList.itemContent);
+    await expect(visibleNotes).toHaveCount(1);
+
+    // NOTE: Verify note count updates to show filtered results
+    const filteredCount = await page.locator(selectors.searchBar.status).textContent();
+    expect(filteredCount).toContain('1');
   });
 
   test('should handle no search results', async ({ page }) => {
@@ -96,9 +111,10 @@ test.describe('Search Notes', () => {
     const noteContent = `Available note ${timestamp}`;
 
     await createNote(page, noteContent);
+    await verifyNoteExists(page, noteContent);
 
-    // NOTE: Search for non-existent unique content
-    const nonExistentQuery = `nonexistent${timestamp}xyz`;
+    // NOTE: Search for non-existent unique content (very specific to avoid matches)
+    const nonExistentQuery = `zzzneverexistingqueryzzzz${timestamp}xyz123`;
     await searchNotes(page, nonExistentQuery);
 
     // NOTE: Verify no results
@@ -148,7 +164,7 @@ test.describe('Search Notes', () => {
     await verifyNoteExists(page, noteContent);
   });
 
-  test('should clear search with clear button', async ({ page }) => {
+  test('should clear search by emptying input', async ({ page }) => {
     await page.goto('/');
 
     // NOTE: Create notes with unique content
@@ -163,11 +179,12 @@ test.describe('Search Notes', () => {
     // NOTE: Perform search
     await searchNotes(page, searchTerm);
 
-    // NOTE: Verify clear button is visible
-    await expect(page.locator(selectors.searchBar.clearButton)).toBeVisible();
+    // NOTE: Verify only one note is shown
+    const filteredNotes = page.locator(selectors.noteList.itemContent);
+    await expect(filteredNotes).toHaveCount(1);
 
-    // NOTE: Click clear button
-    await page.click(selectors.searchBar.clearButton);
+    // NOTE: Clear search by emptying input
+    await clearSearch(page);
 
     // NOTE: Verify search input is cleared
     const inputValue = await page.locator(selectors.searchBar.input).inputValue();

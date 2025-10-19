@@ -56,7 +56,22 @@ test.describe('Delete Note', () => {
       await dialog.accept();
     });
 
-    // NOTE: Click delete
+    // NOTE: Hover over thread node to show menu button
+    const threadNode = page.locator('[data-testid="thread-node"]').first();
+    await threadNode.hover();
+    await page.waitForTimeout(100);
+
+    // NOTE: Click the dropdown menu button
+    const menuButton = threadNode.locator('button:has(svg)').first();
+    await menuButton.click();
+
+    // NOTE: Wait for menu to appear
+    await page.waitForTimeout(500);
+
+    // NOTE: Wait for delete button to be visible
+    await page.waitForSelector(selectors.threadView.deleteButton, { state: 'visible', timeout: 5000 });
+
+    // NOTE: Click delete from menu
     await page.click(selectors.threadView.deleteButton);
 
     // NOTE: Wait a moment for dialog
@@ -123,16 +138,31 @@ test.describe('Delete Note', () => {
     // NOTE: Select the note
     await selectNoteByContent(page, noteContent);
 
-    // NOTE: Set up dialog handler to dismiss
-    page.on('dialog', async (dialog) => {
+    // NOTE: Set up dialog handler to dismiss (using once to avoid multiple triggers)
+    page.once('dialog', async (dialog) => {
       await dialog.dismiss();
     });
 
-    // NOTE: Click delete
+    // NOTE: Hover over thread node to show menu button
+    const threadNode = page.locator('[data-testid="thread-node"]').first();
+    await threadNode.hover();
+    await page.waitForTimeout(100);
+
+    // NOTE: Click the dropdown menu button
+    const menuButton = threadNode.locator('button:has(svg)').first();
+    await menuButton.click();
+
+    // NOTE: Wait for menu to appear
+    await page.waitForTimeout(500);
+
+    // NOTE: Wait for delete button to be visible
+    await page.waitForSelector(selectors.threadView.deleteButton, { state: 'visible', timeout: 5000 });
+
+    // NOTE: Click delete from menu
     await page.click(selectors.threadView.deleteButton);
 
-    // NOTE: Wait a moment
-    await page.waitForTimeout(500);
+    // NOTE: Wait for dialog to be dismissed and UI to update
+    await page.waitForTimeout(1000);
 
     // NOTE: Verify note still exists
     await verifyNoteExists(page, noteContent);
@@ -203,6 +233,6 @@ test.describe('Delete Note', () => {
     await deleteNote(page);
 
     // NOTE: Verify thread view shows empty state
-    await expect(page.locator('.notes-page__empty')).toBeVisible();
+    await expect(page.locator('text=Select a note to view its thread')).toBeVisible();
   });
 });
