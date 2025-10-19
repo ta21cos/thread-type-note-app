@@ -121,8 +121,8 @@ export const useCreateNote = () => {
       return response;
     },
     onSuccess: (newNote) => {
-      // NOTE: Invalidate notes list to refetch
-      queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+      // NOTE: Refetch notes list immediately to get updated replyCount
+      queryClient.refetchQueries({ queryKey: noteKeys.lists() });
 
       // NOTE: If it's a reply, invalidate parent thread
       if (newNote.parentId) {

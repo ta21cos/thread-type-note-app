@@ -113,9 +113,10 @@ export async function replyToNote({
     { timeout: 5000 }
   );
 
-  // NOTE: Fill and submit reply
-  await page.fill(selectors.noteEditor.textarea, content);
-  await page.click(selectors.noteEditor.submitButton);
+  // NOTE: Fill and submit reply (scope to thread view to avoid main editor)
+  const threadView = page.locator(selectors.threadView.container);
+  await threadView.locator(selectors.noteEditor.textarea).fill(content);
+  await threadView.locator(selectors.noteEditor.submitButton).click();
 
   // NOTE: Wait for API response
   const response = await responsePromise;

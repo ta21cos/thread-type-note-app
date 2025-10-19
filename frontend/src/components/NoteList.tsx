@@ -110,9 +110,9 @@ export const NoteList: React.FC<NoteListProps> = ({
             <div className="note-item__content">
               {truncateContent(note.content)}
             </div>
-            {note.parentId && (
+            {note.replyCount !== undefined && note.replyCount > 0 && (
               <div className="note-item__reply-indicator">
-                Reply to #{note.parentId}
+                {note.replyCount} {note.replyCount === 1 ? 'reply' : 'replies'}
               </div>
             )}
           </div>

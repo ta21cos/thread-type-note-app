@@ -1,4 +1,5 @@
-import { eq, isNull, desc } from 'drizzle-orm';
+import { eq, isNull, desc, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/sqlite-core';
 import { db, sqlite, notes, type Note, type NewNote } from '../db';
 
 // NOTE: Repository for Note CRUD operations
@@ -14,13 +15,34 @@ export class NoteRepository {
   }
 
   async findRootNotes(limit: number, offset: number): Promise<Note[]> {
-    return db
-      .select()
+    // NOTE: Create alias for child notes to avoid ambiguous column names in self-join
+    const childNotes = alias(notes, 'child_notes');
+
+    const results = await db
+      .select({
+        id: notes.id,
+        content: notes.content,
+        parentId: notes.parentId,
+        createdAt: notes.createdAt,
+        updatedAt: notes.updatedAt,
+        depth: notes.depth,
+        replyCount: sql<number>`COUNT(${childNotes.id})`.mapWith(Number),
+      })
       .from(notes)
+      .leftJoin(childNotes, eq(childNotes.parentId, notes.id))
       .where(isNull(notes.parentId))
+      .groupBy(notes.id)
       .orderBy(desc(notes.createdAt))
       .limit(limit)
       .offset(offset);
+
+    // NOTE: Convert dates to ISO strings and ensure replyCount is a number
+    return results.map(note => ({
+      ...note,
+      createdAt: note.createdAt instanceof Date ? note.createdAt.toISOString() : note.createdAt,
+      updatedAt: note.updatedAt instanceof Date ? note.updatedAt.toISOString() : note.updatedAt,
+      replyCount: Number(note.replyCount) || 0,
+    }));
   }
 
   async countRootNotes(): Promise<number> {

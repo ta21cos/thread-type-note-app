@@ -6,6 +6,7 @@ export interface Note {
   createdAt: string; // ISO 8601 string
   updatedAt: string; // ISO 8601 string
   depth: number; // Thread depth (0 for root)
+  replyCount?: number; // Number of direct replies (optional, included in list views)
 }
 
 export interface Mention {
