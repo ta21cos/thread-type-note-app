@@ -17,10 +17,10 @@ export class SearchRepository {
     const notes = searchQuery.all(likePattern, limit);
 
     // NOTE: Convert Date objects to ISO strings for serialization
-    return notes.map(note => ({
+    return notes.map((note) => ({
       ...note,
       createdAt: note.createdAt instanceof Date ? note.createdAt.toISOString() : note.createdAt,
-      updatedAt: note.updatedAt instanceof Date ? note.updatedAt.toISOString() : note.updatedAt
+      updatedAt: note.updatedAt instanceof Date ? note.updatedAt.toISOString() : note.updatedAt,
     }));
   }
 
