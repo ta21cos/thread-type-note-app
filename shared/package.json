@@ -4,6 +4,10 @@
   "type": "module",
   "main": "./types/index.ts",
   "types": "./types/index.ts",
+  "exports": {
+    "./constants": "./constants/index.ts",
+    "./types": "./types/index.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },

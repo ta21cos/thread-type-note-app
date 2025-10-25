@@ -38,13 +38,6 @@ function cleanDatabase() {
       // Ignore if table doesn't exist
     }
 
-    // NOTE: Clean FTS5 virtual table if it exists
-    try {
-      sqlite.run('DELETE FROM notes_fts');
-    } catch (e) {
-      // Ignore if FTS table doesn't exist
-    }
-
     console.log('✓ Test database cleaned');
     sqlite.close();
   } catch (error) {

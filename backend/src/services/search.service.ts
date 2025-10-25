@@ -2,7 +2,7 @@ import { SearchRepository } from '../repositories/search.repository';
 import { MentionRepository } from '../repositories/mention.repository';
 import type { Note } from '../db';
 
-// NOTE: Service for FTS5 full-text search
+// NOTE: Service for content search
 export class SearchService {
   private searchRepo = new SearchRepository();
   private mentionRepo = new MentionRepository();

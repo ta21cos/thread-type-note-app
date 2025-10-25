@@ -3,8 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./",
-    "types": ["bun-types", "vitest/globals"]
+    "types": ["@types/bun", "vitest/globals", "@cloudflare/workers-types"]
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "../shared/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -15,20 +15,30 @@ export default defineConfig(({ mode }) => {
     logLevel: 'info',
     server: {
       port,
-      proxy: {
-        '/api': {
-          target: env.VITE_BACKEND_API_ENDPOINT,
-          changeOrigin: true,
+      // NOTE: Proxy only needed for development (not production)
+      ...(mode !== 'production' && {
+        proxy: {
+          '/api': {
+            target: env.VITE_BACKEND_API_ENDPOINT,
+            changeOrigin: true,
+          },
+          // NOTE: WebSocket proxy removed - using polling instead
         },
-        '/ws': {
-          target: env.VITE_BACKEND_WS_ENDPOINT,
-          ws: true,
-        },
-      },
+      }),
     },
     build: {
       outDir: 'dist',
-      sourcemap: true,
+      sourcemap: mode !== 'production', // NOTE: Only generate sourcemaps in dev/test
+      minify: mode === 'production', // NOTE: Minify for production
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // NOTE: Split vendor code for better caching
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            'query-vendor': ['@tanstack/react-query'],
+          },
+        },
+      },
     },
     resolve: {
       alias: {

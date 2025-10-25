@@ -20,8 +20,8 @@ app.get('/:id/mentions', validateNoteId, async (c) => {
 
   const response: MentionsResponse = {
     mentions: mentionsWithNotes.map((m) => ({
-      note: m.note,
-      position: m.mention.position,
+      note: m.notes,
+      position: m.mentions,
     })),
   };
 
