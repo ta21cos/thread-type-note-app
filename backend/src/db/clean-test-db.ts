@@ -1,13 +1,7 @@
 import { Database } from 'bun:sqlite';
-import { config } from 'dotenv';
-import path from 'path';
-
-// NOTE: Load .env.test for test environment
-const envPath = path.resolve(process.cwd(), '.env.test');
-config({ path: envPath });
 
 // NOTE: Clean test database for E2E tests using direct SQL
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = 'data/test.db'; // process.env.DATABASE_URL;
 
 function cleanDatabase() {
   if (!DATABASE_URL) {

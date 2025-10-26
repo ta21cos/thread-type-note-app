@@ -1,3 +1,5 @@
+// TODO: Not needed anymore...?
+
 const nodeEnv = process.env.NODE_ENV || 'development';
 
 export interface Config {
