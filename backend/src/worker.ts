@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import app from './api/app';
 import { initD1Database } from './db/d1';
-import { setDb } from './db';
+import { setDb, type Database } from './db';
 
 // NOTE: Cloudflare Workers environment bindings
 export type Bindings = {
@@ -17,7 +17,7 @@ const worker = new Hono<{ Bindings: Bindings }>();
 worker.use('*', async (c, next) => {
   // NOTE: Initialize D1 database with binding from Workers environment
   const db = initD1Database(c.env.DB as D1Database);
-  setDb(db);
+  setDb(db as Database);
 
   await next();
 });
