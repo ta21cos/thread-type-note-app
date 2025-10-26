@@ -41,9 +41,11 @@ test.describe('Mention Note', () => {
     // NOTE: Click mention link
     await clickMentionLink(page, targetNoteId);
 
-    // NOTE: Verify target note is highlighted (has the highlighted class)
-    const targetElement = page.locator(`#note-${targetNoteId}`);
-    await expect(targetElement).toHaveClass(/thread-node--highlighted/);
+    // NOTE: Verify URL changed to target note
+    await page.waitForURL(`**/notes/${targetNoteId}`);
+
+    // NOTE: Verify target note content is visible in thread view
+    await expect(page.locator('[data-testid="thread-node-content"]').filter({ hasText: targetNoteContent })).toBeVisible();
   });
 
   test('should support multiple mentions in one note', async ({ page }) => {
@@ -73,7 +75,7 @@ test.describe('Mention Note', () => {
     await expect(mentions.nth(1)).toContainText(`@${secondId}`);
   });
 
-  test('should display mention in correct format', async ({ page }) => {
+  test('should display mention as clickable link', async ({ page }) => {
     await page.goto('/');
 
     // NOTE: Create note to mention with unique content
@@ -88,11 +90,15 @@ test.describe('Mention Note', () => {
     // NOTE: Select the mentioning note
     await selectNoteByContent(page, mentioningContent);
 
-    // NOTE: Verify mention link has correct class
-    const mentionLink = page.locator(selectors.threadView.mention).first();
-    await expect(mentionLink).toHaveClass(/thread-node__mention/);
+    // NOTE: Verify mention is displayed as a clickable link
+    const mentionLink = page.locator(`a:has-text("@${noteId}")`).first();
+    await expect(mentionLink).toBeVisible();
 
-    // NOTE: Verify mention is clickable (is a link)
+    // NOTE: Verify it's an anchor tag with href
+    const tagName = await mentionLink.evaluate(el => el.tagName.toLowerCase());
+    expect(tagName).toBe('a');
+
+    // NOTE: Verify href contains note ID
     const href = await mentionLink.getAttribute('href');
     expect(href).toContain(noteId);
   });

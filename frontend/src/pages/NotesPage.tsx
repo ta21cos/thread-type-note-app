@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SplitView } from '../layouts/SplitView';
 import { NoteList } from '../components/NoteList';
 import { ThreadView } from '../components/ThreadView';
-import { NoteEditor } from '../components/NoteEditor';
-import { SearchBar } from '../components/SearchBar';
 import {
   useInfiniteNotes,
   useNote,
   useCreateNote,
   useUpdateNote,
   useDeleteNote,
-  useSearchNotes,
 } from '../services/note.service';
 import { useNotesUI } from '../store/notes.store';
 
@@ -21,23 +18,9 @@ export const NotesPage: React.FC = () => {
   const {
     selectedNoteId,
     setSelectedNoteId,
-    isSearchOpen,
-    searchQuery,
-    setSearchQuery,
     replyingToNoteId,
     stopReply,
   } = useNotesUI();
-
-  // NOTE: Debounced search query (300ms delay after user stops typing)
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   // NOTE: Fetch notes with infinite scroll
   const {
@@ -50,12 +33,6 @@ export const NotesPage: React.FC = () => {
 
   // NOTE: Fetch selected note with thread
   const { data: noteData, isLoading: noteLoading } = useNote(selectedNoteId ?? undefined);
-
-  // NOTE: Search notes with debounced query
-  const { data: searchData, isLoading: searchLoading } = useSearchNotes(
-    debouncedSearchQuery,
-    'content'
-  );
 
   // NOTE: Create note mutation
   const createNote = useCreateNote();
@@ -106,51 +83,22 @@ export const NotesPage: React.FC = () => {
   };
 
   // NOTE: Flatten paginated notes
-  const allNotes = notesData?.pages.flatMap((page) => page.notes) || [];
-
-  // NOTE: Display search results or all notes
-  // When searching, always show search results (even if empty during debounce)
-  // This prevents flashing all notes during the debounce period
-  const displayNotes = isSearchOpen && searchQuery
-    ? searchData?.results || []
-    : allNotes;
+  const displayNotes = notesData?.pages.flatMap((page) => page.notes) || [];
 
   return (
     <div className="notes-page">
-      {/* NOTE: Search bar */}
-      <div className="notes-page__header">
-        <SearchBar
-          onSearch={setSearchQuery}
-          initialValue={searchQuery}
-          onClear={() => setSearchQuery('')}
-        />
-      </div>
-
       {/* NOTE: Split view layout */}
       <SplitView
         left={
-          <div className="notes-page__left">
-            {/* NOTE: Editor for new notes */}
-            {!replyingToNoteId && (
-              <div className="notes-page__editor">
-                <NoteEditor
-                  onSubmit={handleCreateNote}
-                  placeholder="Write a new note..."
-                  maxLength={1000}
-                />
-              </div>
-            )}
-
-            {/* NOTE: Notes list */}
-            <NoteList
-              notes={displayNotes}
-              selectedNoteId={selectedNoteId ?? undefined}
-              onNoteSelect={handleNoteSelect}
-              onLoadMore={handleLoadMore}
-              hasMore={hasNextPage}
-              loading={notesLoading || isFetchingNextPage || searchLoading}
-            />
-          </div>
+          <NoteList
+            notes={displayNotes}
+            selectedNoteId={selectedNoteId ?? undefined}
+            onNoteSelect={handleNoteSelect}
+            onLoadMore={handleLoadMore}
+            hasMore={hasNextPage}
+            loading={notesLoading || isFetchingNextPage}
+            onCreateNote={!replyingToNoteId ? handleCreateNote : undefined}
+          />
         }
         right={
           <div className="notes-page__right">
