@@ -82,3 +82,12 @@ Desktop.ini
 
 # serena
 .serena/
+
+# Cloudflare Workers
+.wrangler/
+wrangler.toml.local
+*.workers.dev
+
+
+
+slack-chat-app/

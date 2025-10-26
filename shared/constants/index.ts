@@ -4,8 +4,6 @@ export const MAX_THREAD_DEPTH = 100;
 export const ID_LENGTH = 6;
 export const ID_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-export const API_BASE_URL = process.env.API_URL || 'http://localhost:3000/api';
-
 export const ERROR_CODES = {
   NOTE_NOT_FOUND: 'NOTE_NOT_FOUND',
   INVALID_CONTENT_LENGTH: 'INVALID_CONTENT_LENGTH',

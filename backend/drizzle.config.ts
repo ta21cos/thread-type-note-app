@@ -36,8 +36,6 @@ if (env === 'production') {
   };
 }
 
-console.log({ env: process.env, envConfig });
-
 export default {
   schema: './src/models/*.schema.ts',
   out: './drizzle',
