@@ -1,8 +1,10 @@
+// TODO: use drizzle types instead of this file
+
 // NOTE: Shared TypeScript interfaces for Note entities
 export interface Note {
   id: string; // 6-char alphanumeric ID
   content: string; // Markdown content (max 1000 chars)
-  parentId?: string; // Reference to parent note (null for root)
+  parentId: string | null; // Reference to parent note (null for root)
   createdAt: string; // ISO 8601 string
   updatedAt: string; // ISO 8601 string
   depth: number; // Thread depth (0 for root)
@@ -26,7 +28,7 @@ export interface SearchIndex {
   content: string; // Preprocessed for search
   tokens: string[];
   mentions: string[];
-  updatedAt: string; // ISO 8601 string
+  updatedAt: Date; // ISO 8601 string
 }
 
 // NOTE: API request/response types

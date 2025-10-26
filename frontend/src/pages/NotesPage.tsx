@@ -39,12 +39,8 @@ export const NotesPage: React.FC = () => {
   const updateNote = useUpdateNote();
   const deleteNote = useDeleteNote();
 
-  // NOTE: Connect to WebSocket for real-time updates
-  // TODO: Re-enable when backend WebSocket is implemented
-  // useWebSocket({
-  //   onOpen: () => console.log('Connected to real-time updates'),
-  //   onError: (error) => console.error('WebSocket error:', error),
-  // });
+  // NOTE: Real-time updates to be implemented in the future
+  // TODO: Implement WebSocket or polling for real-time note updates
 
   // NOTE: Sync URL param with selected note
   useEffect(() => {

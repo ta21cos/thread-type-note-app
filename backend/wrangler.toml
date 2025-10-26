@@ -1,0 +1,37 @@
+name = "thread-note-backend"
+main = "src/worker.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# NOTE: D1 Database binding
+# Run `wrangler d1 create thread-notes-db` to create the database
+# Then update the database_id below with the generated ID
+[[d1_databases]]
+binding = "DB"
+database_name = "thread-notes-db"
+database_id = "b13731da-8916-4a2c-a96d-84272ff9da29"
+
+# NOTE: Environment variables for production
+[env.production]
+name = "thread-note-backend-production"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "thread-notes-db-production"
+database_id = "92003a61-32e5-4b53-8808-20d1e27191d8"
+
+# NOTE: Development environment with local D1
+[env.development]
+name = "thread-note-backend-dev"
+
+# NOTE: Limits and configuration
+[limits]
+cpu_ms = 50  # NOTE: 50ms CPU time limit (default)
+
+# NOTE: Build configuration
+[build]
+command = "bun run build"
+
+# NOTE: Observability
+[observability]
+enabled = true

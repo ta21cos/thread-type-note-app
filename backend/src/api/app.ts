@@ -18,6 +18,11 @@ app.route('/api/notes', searchRoutes);  // /search route
 app.route('/api/notes', mentionsRoutes); // /:id/mentions route
 app.route('/api/notes', notesRoutes);   // /:id route (must be last)
 
+// NOTE: Health check endpoint for monitoring
+app.get('/health', (c) => {
+  return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Error handling
 app.onError(errorHandler);
 

@@ -2,7 +2,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import { notes } from './note.schema';
 
-// NOTE: FTS5 virtual table for full-text search (as per research.md)
+// NOTE: Search index table for storing searchable content
 export const searchIndex = sqliteTable('search_index', {
   noteId: text('note_id')
     .primaryKey()
