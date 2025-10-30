@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { db, notes, sqlite } from '../../src/db';
+import { db, notes } from '../../src/db';
+import { sql } from 'drizzle-orm';
 
 // NOTE: Contract test for GET /api/notes/search (search notes)
 describe('GET /api/notes/search', () => {
   beforeAll(async () => {
-    // NOTE: Create FTS5 table if it doesn't exist
-    sqlite.exec(`
+    // NOTE: Create FTS5 table if it doesn't exist using Drizzle
+    await db.run(sql`
       CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
         note_id UNINDEXED,
         content,
@@ -25,10 +26,10 @@ describe('GET /api/notes/search', () => {
     await db.insert(notes).values(testNote).onConflictDoNothing();
 
     // Index in FTS5
-    sqlite.run(
-      `INSERT OR REPLACE INTO notes_fts(note_id, content) VALUES (?, ?)`,
-      [testNote.id, testNote.content.toLowerCase()]
-    );
+    await db.run(sql`
+      INSERT OR REPLACE INTO notes_fts(note_id, content)
+      VALUES (${testNote.id}, ${testNote.content.toLowerCase()})
+    `);
 
     // Create note that mentions another
     const mentionNote = {
@@ -41,10 +42,10 @@ describe('GET /api/notes/search', () => {
 
     await db.insert(notes).values(mentionNote).onConflictDoNothing();
 
-    sqlite.run(
-      `INSERT OR REPLACE INTO notes_fts(note_id, content) VALUES (?, ?)`,
-      [mentionNote.id, mentionNote.content.toLowerCase()]
-    );
+    await db.run(sql`
+      INSERT OR REPLACE INTO notes_fts(note_id, content)
+      VALUES (${mentionNote.id}, ${mentionNote.content.toLowerCase()})
+    `);
   });
   it('should search notes by content', async () => {
     const response = await fetch('http://localhost:3000/api/notes/search?q=test&type=content');

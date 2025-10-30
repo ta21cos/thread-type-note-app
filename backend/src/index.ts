@@ -1,11 +1,15 @@
 import app from './api/app';
 import { appConfig } from './config';
+import { initBunDatabase } from './db/bun';
+import { setDb, type Database } from './db';
 
 const port = appConfig.port;
 
 console.log(`Server starting on port ${port}...`);
 
-// NOTE: Database is auto-initialized in db/index.ts for Bun environment
+// NOTE: Initialize Bun SQLite database for local development
+const bunDb = initBunDatabase(appConfig.databaseUrl);
+setDb(bunDb as Database);
 
 export default {
   port,

@@ -14,8 +14,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "bun src/db/seed.ts",
-    "deploy": "wrangler deploy",
-    "deploy:db": "wrangler d1 execute thread-notes-db --file=./drizzle/schema.sql",
+    "db:initialize::production": "wrangler d1 execute thread-notes-db-production --file=./drizzle/schema.sql",
+    "deploy:production": "wrangler --env=production deploy",
+    "db:migrate:production": "bun --env-file=.env.production db:migrate",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },
@@ -36,6 +37,6 @@
     "eslint": "^8.55.0",
     "typescript": "^5.3.3",
     "vitest": "^1.0.4",
-    "wrangler": "^3.95.0"
+    "wrangler": "^4.45.0"
   }
 }

@@ -6,21 +6,19 @@ import type { Note } from '../db';
 // NOTE: Repository for content search using advanced Drizzle ORM features
 export class SearchRepository {
   // NOTE: Prepared statement for better performance
-  private searchByContentPrepared = db
-    .select()
-    .from(notes)
-    .where(like(notes.content, sql.placeholder('pattern')))
-    .orderBy(desc(notes.updatedAt))
-    .limit(sql.placeholder('limit'))
-    .prepare();
 
   async searchByContent(query: string, limit: number = 20): Promise<Note[]> {
     // NOTE: Use prepared statement for better performance
     const likePattern = `%${query}%`;
 
-    return await this.searchByContentPrepared.execute({
-      pattern: likePattern,
-      limit,
-    });
+    const result = await db
+      .select()
+      .from(notes)
+      .where(like(notes.content, likePattern))
+      .orderBy(desc(notes.updatedAt))
+      .limit(limit)
+      .execute();
+
+    return result;
   }
 }
