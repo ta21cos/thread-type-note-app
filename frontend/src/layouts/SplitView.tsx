@@ -171,12 +171,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
       {/* Left Panel */}
       <div
         ref={leftPanelRef}
-        className="h-full overflow-hidden border-r border-border"
+        className="h-full overflow-hidden border-r border-border flex"
         style={{ width: `${splitPosition}%` }}
       >
-        <div className="w-full h-full overflow-auto">
-          {left}
-        </div>
+        {left}
       </div>
 
       {/* Divider */}
@@ -210,12 +208,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
       {/* Right Panel */}
       <div
         ref={rightPanelRef}
-        className="h-full overflow-hidden"
+        className="h-full overflow-hidden flex"
         style={{ width: `${100 - splitPosition}%` }}
       >
-        <div className="w-full h-full overflow-auto">
-          {right}
-        </div>
+        {right}
       </div>
 
       {/* NOTE: Keyboard shortcuts hint */}

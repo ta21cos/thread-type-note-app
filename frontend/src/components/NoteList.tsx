@@ -96,9 +96,9 @@ export const NoteList: React.FC<NoteListProps> = ({
   };
 
   return (
-    <div className="flex flex-1 flex-col bg-background" data-testid="note-list">
+    <div className="flex flex-col h-full w-full bg-background" data-testid="note-list">
       {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b border-border px-4">
+      <div className="flex h-14 items-center justify-between border-b border-border px-4 flex-shrink-0">
         <div className="flex items-center gap-2">
           <Hash className="h-5 w-5 text-muted-foreground" />
           <h1 className="font-semibold text-foreground text-lg">notes</h1>
@@ -114,7 +114,7 @@ export const NoteList: React.FC<NoteListProps> = ({
       </div>
 
       {/* Search Bar */}
-      <div className="border-b border-border p-4">
+      <div className="border-b border-border p-4 flex-shrink-0">
         <div className="relative">
           <Search className="absolute top-2.5 left-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -316,7 +316,7 @@ export const NoteList: React.FC<NoteListProps> = ({
 
       {/* Note Editor at bottom */}
       {onCreateNote && (
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-4 flex-shrink-0">
           <NoteEditor onSubmit={onCreateNote} placeholder="Message #notes" />
         </div>
       )}
