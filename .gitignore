@@ -40,6 +40,7 @@ __pycache__/
 .env.local
 .env.*.local
 .env.production
+.env.staging
 
 # Logs
 logs/
@@ -88,6 +89,5 @@ Desktop.ini
 wrangler.toml.local
 *.workers.dev
 
-
-
+# TODO: Remove this
 slack-chat-app/

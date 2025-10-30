@@ -2,7 +2,6 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./",
     "types": ["@types/bun", "vitest/globals", "@cloudflare/workers-types"]
   },
   "include": ["src/**/*", "tests/**/*", "../shared/**/*"],
