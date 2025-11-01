@@ -12,7 +12,7 @@ if (!root) {
 
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <App />
     </ThemeProvider>
   </React.StrictMode>

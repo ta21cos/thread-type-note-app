@@ -13,6 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 import { getRelativeTime } from '@/lib/utils';
 import NoteEditor from './NoteEditor';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NoteListProps {
   notes: Note[];
@@ -107,6 +108,7 @@ export const NoteList: React.FC<NoteListProps> = ({
           <span className="text-muted-foreground text-xs" data-testid="note-list-count">
             {filteredNotes.length} notes
           </span>
+          <ThemeToggle />
           <Button size="icon" variant="ghost" className="h-8 w-8">
             <Plus className="h-4 w-4" />
           </Button>
