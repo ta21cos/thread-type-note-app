@@ -99,12 +99,12 @@ export const NoteList: React.FC<NoteListProps> = ({
   return (
     <div className="flex flex-col h-full w-full bg-background" data-testid="note-list">
       {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b border-border px-4 flex-shrink-0 relative z-10">
+      <div className="flex h-14 items-center justify-between border-b border-border px-4 flex-shrink-0">
         <div className="flex items-center gap-2">
           <Hash className="h-5 w-5 text-muted-foreground" />
           <h1 className="font-semibold text-foreground text-lg">notes</h1>
         </div>
-        <div className="flex items-center gap-2 relative z-20">
+        <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-xs" data-testid="note-list-count">
             {filteredNotes.length} notes
           </span>
