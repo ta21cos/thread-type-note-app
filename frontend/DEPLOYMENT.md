@@ -86,12 +86,15 @@ On your first deployment, Cloudflare Pages will create the project automatically
 
 ## Environment Variables in Cloudflare Pages
 
-Vite embeds environment variables at build time, so all `VITE_*` variables from your `.env` files are already included in the built files. You typically don't need to set environment variables in the Cloudflare Pages dashboard.
+**Important**: Vite embeds environment variables at build time, so all `VITE_*` variables from your `.env` files are compiled into the JavaScript bundle.
 
-However, if you need runtime environment variables:
-1. Go to your Pages project settings
-2. Navigate to **Settings** > **Environment variables**
-3. Add variables for Production or Preview deployments
+The frontend uses `VITE_BACKEND_API_ENDPOINT` to determine the backend API URL:
+- **Development**: Uses `/api` (proxied by Vite dev server to `localhost:3000`)
+- **Production/Staging**: Uses the full URL from `.env.production` or `.env.staging`
+
+Make sure to update `.env.production` and `.env.staging` with your actual backend URLs before building/deploying.
+
+You don't need to set environment variables in the Cloudflare Pages dashboard since they're embedded at build time.
 
 ## Custom Domains
 

@@ -14,10 +14,15 @@ interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_API_ENDPOINT
+  ? `${import.meta.env.VITE_BACKEND_API_ENDPOINT}/api`
+  : '/api';
 
 // NOTE: Build URL with query parameters
-const buildUrl = (path: string, params?: Record<string, string | number | boolean | undefined>): string => {
+const buildUrl = (
+  path: string,
+  params?: Record<string, string | number | boolean | undefined>
+): string => {
   const url = new URL(path, window.location.origin);
 
   if (params) {
@@ -81,6 +86,5 @@ export const api = {
       body: body ? JSON.stringify(body) : undefined,
     }),
 
-  delete: <T>(endpoint: string) =>
-    apiFetch<T>(endpoint, { method: 'DELETE' }),
+  delete: <T>(endpoint: string) => apiFetch<T>(endpoint, { method: 'DELETE' }),
 };

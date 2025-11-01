@@ -7,5 +7,5 @@ pages_build_output_dir = "dist"
 name = "thread-note-frontend-production"
 
 # NOTE: Staging environment
-[env.staging]
+[env.preview]
 name = "thread-note-frontend-staging"

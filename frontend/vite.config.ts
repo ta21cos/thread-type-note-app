@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production' || mode === 'staging';
 
   return {
+    base: '/', // NOTE: Ensure assets are loaded from root in production
     plugins: [react()],
     logLevel: 'info',
     server: {
