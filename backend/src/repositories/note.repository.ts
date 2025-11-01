@@ -1,4 +1,4 @@
-import { eq, isNull, desc, sql, asc } from 'drizzle-orm';
+import { eq, isNull, desc, asc } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
 import { db, notes, type Note, type NewNote } from '../db';
 
@@ -71,38 +71,59 @@ export class NoteRepository {
   }
 
   async getThreadRecursive(rootId: string): Promise<Note[]> {
-    // NOTE: Use Drizzle's sql template for recursive CTE (works with both Bun SQLite and D1)
-    const result = await db.execute(
-      sql`
-        WITH RECURSIVE thread AS (
-          SELECT
-            id,
-            content,
-            parent_id as "parentId",
-            created_at as "createdAt",
-            updated_at as "updatedAt",
-            depth
-          FROM ${notes}
-          WHERE id = ${rootId}
-          UNION ALL
-          SELECT
-            n.id,
-            n.content,
-            n.parent_id as "parentId",
-            n.created_at as "createdAt",
-            n.updated_at as "updatedAt",
-            n.depth
-          FROM ${notes} n
-          JOIN thread t ON n.parent_id = t.id
-        )
-        SELECT * FROM thread ORDER BY depth, "createdAt"
-      `
-    );
+    // NOTE: Use Drizzle ORM queries instead of raw SQL for D1 compatibility
+    // This approach uses breadth-first traversal to build the thread
+    const result: Note[] = [];
+    const queue: string[] = [rootId];
+    const visited = new Set<string>();
 
-    const results = result.rows as unknown as Note[];
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+
+      // Skip if already processed
+      if (visited.has(currentId)) {
+        continue;
+      }
+      visited.add(currentId);
+
+      // Fetch current note
+      const [currentNote] = await db
+        .select()
+        .from(notes)
+        .where(eq(notes.id, currentId));
+
+      if (!currentNote) {
+        continue;
+      }
+
+      // Add to result
+      result.push(currentNote);
+
+      // Fetch children and add to queue
+      const children = await db
+        .select()
+        .from(notes)
+        .where(eq(notes.parentId, currentId))
+        .orderBy(asc(notes.createdAt));
+
+      // Add children to queue
+      for (const child of children) {
+        queue.push(child.id);
+      }
+    }
+
+    // Sort by depth and createdAt to maintain order
+    result.sort((a, b) => {
+      if (a.depth !== b.depth) {
+        return a.depth - b.depth;
+      }
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      return aTime - bTime;
+    });
 
     // NOTE: Convert Date objects to ISO strings for serialization
-    return results.map((note: Note) => ({
+    return result.map((note: Note) => ({
       ...note,
       createdAt: note.createdAt instanceof Date ? note.createdAt.toISOString() : note.createdAt,
       updatedAt: note.updatedAt instanceof Date ? note.updatedAt.toISOString() : note.updatedAt,

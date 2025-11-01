@@ -1,6 +1,6 @@
 import { db } from '../db';
 import { notes } from '../models/note.schema';
-import { like, desc, asc, eq, and, or, sql, count } from 'drizzle-orm';
+import { like, desc } from 'drizzle-orm';
 import type { Note } from '../db';
 
 // NOTE: Repository for content search using advanced Drizzle ORM features
@@ -16,8 +16,7 @@ export class SearchRepository {
       .from(notes)
       .where(like(notes.content, likePattern))
       .orderBy(desc(notes.updatedAt))
-      .limit(limit)
-      .execute();
+      .limit(limit);
 
     return result;
   }

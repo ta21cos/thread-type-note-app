@@ -9,16 +9,6 @@ export type BunDatabase = BunSQLiteDatabase<typeof schema>;
 // NOTE: D1 database type for Cloudflare Workers
 export type D1DrizzleDatabase = DrizzleD1Database<typeof schema>;
 
-// NOTE: Execute method return type for raw SQL queries
-export interface ExecuteResult {
-  rows: unknown[];
-}
-
-// NOTE: Common database interface with execute method for raw SQL
-// TODO: REMOVE
-export interface DatabaseWithExecute {
-  execute: (query: SQL) => Promise<ExecuteResult>;
-}
-
 // NOTE: Union type supporting both Bun SQLite (dev) and D1 (production)
-export type Database = (BunDatabase | D1DrizzleDatabase) & DatabaseWithExecute;
+// Both database types now use the same Drizzle ORM API
+export type Database = BunDatabase | D1DrizzleDatabase;
