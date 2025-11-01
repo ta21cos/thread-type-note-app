@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface SplitViewProps {
   left: React.ReactNode;
@@ -9,6 +10,8 @@ interface SplitViewProps {
   minRightWidth?: number;
   onSplitChange?: (position: number) => void;
   className?: string;
+  showRight?: boolean;
+  onCloseRight?: () => void;
 }
 
 export const SplitView: React.FC<SplitViewProps> = ({
@@ -19,12 +22,15 @@ export const SplitView: React.FC<SplitViewProps> = ({
   minRightWidth = 400,
   onSplitChange,
   className = '',
+  showRight = true,
+  onCloseRight,
 }) => {
   const [splitPosition, setSplitPosition] = useState(defaultSplitPosition);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   // NOTE: Load saved split position from localStorage
   useEffect(() => {
@@ -157,6 +163,10 @@ export const SplitView: React.FC<SplitViewProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [minLeftWidth, minRightWidth]);
 
+  // NOTE: On mobile, when right panel is shown, hide left panel
+  const showLeft = isDesktop || !showRight;
+  const shouldShowRight = showRight;
+
   return (
     <div
       ref={containerRef}
@@ -169,50 +179,63 @@ export const SplitView: React.FC<SplitViewProps> = ({
       tabIndex={-1}
     >
       {/* Left Panel */}
-      <div
-        ref={leftPanelRef}
-        className="h-full overflow-hidden border-r border-border flex"
-        style={{ width: `${splitPosition}%` }}
-      >
-        {left}
-      </div>
-
-      {/* Divider */}
-      <div
-        className={cn(
-          'w-2 h-full bg-secondary cursor-col-resize flex items-center justify-center transition-colors',
-          'hover:bg-accent relative'
-        )}
-        onMouseDown={handleMouseDown}
-        role="separator"
-        aria-label="Resize panels"
-        aria-valuenow={splitPosition}
-        aria-valuemin={20}
-        aria-valuemax={80}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowLeft') {
-            setSplitPosition((prev) => Math.max(20, prev - 2));
-          } else if (e.key === 'ArrowRight') {
-            setSplitPosition((prev) => Math.min(80, prev + 2));
-          }
-        }}
-      >
-        <div className="h-10 flex flex-col items-center justify-center gap-0.5">
-          <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
-          <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
-          <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
+      {showLeft && (
+        <div
+          ref={leftPanelRef}
+          className={cn(
+            'h-full overflow-hidden flex',
+            isDesktop && shouldShowRight && 'border-r border-border'
+          )}
+          style={{
+            width: isDesktop && shouldShowRight ? `${splitPosition}%` : '100%',
+          }}
+        >
+          {left}
         </div>
-      </div>
+      )}
+
+      {/* Divider - only on desktop when right panel is shown */}
+      {isDesktop && shouldShowRight && (
+        <div
+          className={cn(
+            'w-2 h-full bg-secondary cursor-col-resize flex items-center justify-center transition-colors',
+            'hover:bg-accent relative'
+          )}
+          onMouseDown={handleMouseDown}
+          role="separator"
+          aria-label="Resize panels"
+          aria-valuenow={splitPosition}
+          aria-valuemin={20}
+          aria-valuemax={80}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft') {
+              setSplitPosition((prev) => Math.max(20, prev - 2));
+            } else if (e.key === 'ArrowRight') {
+              setSplitPosition((prev) => Math.min(80, prev + 2));
+            }
+          }}
+        >
+          <div className="h-10 flex flex-col items-center justify-center gap-0.5">
+            <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
+            <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
+            <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
+          </div>
+        </div>
+      )}
 
       {/* Right Panel */}
-      <div
-        ref={rightPanelRef}
-        className="h-full overflow-hidden flex"
-        style={{ width: `${100 - splitPosition}%` }}
-      >
-        {right}
-      </div>
+      {shouldShowRight && (
+        <div
+          ref={rightPanelRef}
+          className="h-full overflow-hidden flex"
+          style={{
+            width: isDesktop ? `${100 - splitPosition}%` : '100%',
+          }}
+        >
+          {right}
+        </div>
+      )}
 
       {/* NOTE: Keyboard shortcuts hint */}
       <div className="sr-only">
