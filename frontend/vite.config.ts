@@ -9,14 +9,16 @@ export default defineConfig(({ mode }) => {
   }
 
   const port = mode === 'test' ? 5174 : 5173;
+  const isProduction = mode === 'production' || mode === 'staging';
 
   return {
+    base: '/', // NOTE: Ensure assets are loaded from root in production
     plugins: [react()],
     logLevel: 'info',
     server: {
       port,
-      // NOTE: Proxy only needed for development (not production)
-      ...(mode !== 'production' && {
+      // NOTE: Proxy only needed for development (not production/staging)
+      ...(!isProduction && {
         proxy: {
           '/api': {
             target: env.VITE_BACKEND_API_ENDPOINT,
@@ -28,8 +30,8 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'dist',
-      sourcemap: mode !== 'production', // NOTE: Only generate sourcemaps in dev/test
-      minify: mode === 'production', // NOTE: Minify for production
+      sourcemap: !isProduction, // NOTE: Only generate sourcemaps in dev/test
+      minify: isProduction, // NOTE: Minify for production and staging
       rollupOptions: {
         output: {
           manualChunks: {
