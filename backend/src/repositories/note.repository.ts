@@ -1,6 +1,6 @@
-import { eq, isNull, desc, asc } from 'drizzle-orm';
+import { eq, isNull, desc, asc, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
-import { db, notes, type Note, type NewNote } from '../db';
+import { db, notes, type Note, type NewNote, type NoteWithReplyCount } from '../db';
 
 // NOTE: Repository for Note CRUD operations
 export class NoteRepository {
@@ -14,7 +14,7 @@ export class NoteRepository {
     return note;
   }
 
-  async findRootNotes(limit: number, offset: number): Promise<Note[]> {
+  async findRootNotes(limit: number, offset: number): Promise<NoteWithReplyCount[]> {
     // NOTE: Create alias for child notes to avoid ambiguous column names in self-join
     const childNotes = alias(notes, 'child_notes');
 
@@ -36,13 +36,11 @@ export class NoteRepository {
       .limit(limit)
       .offset(offset);
 
-    // NOTE: Convert dates to ISO strings and ensure replyCount is a number
+    // NOTE: Ensure replyCount is a number
     return results.map(note => ({
       ...note,
-      createdAt: note.createdAt instanceof Date ? note.createdAt.toISOString() : note.createdAt,
-      updatedAt: note.updatedAt instanceof Date ? note.updatedAt.toISOString() : note.updatedAt,
       replyCount: Number(note.replyCount) || 0,
-    }));
+    })) as NoteWithReplyCount[];
   }
 
   async countRootNotes(): Promise<number> {
@@ -122,11 +120,6 @@ export class NoteRepository {
       return aTime - bTime;
     });
 
-    // NOTE: Convert Date objects to ISO strings for serialization
-    return result.map((note: Note) => ({
-      ...note,
-      createdAt: note.createdAt instanceof Date ? note.createdAt.toISOString() : note.createdAt,
-      updatedAt: note.updatedAt instanceof Date ? note.updatedAt.toISOString() : note.updatedAt,
-    }));
+    return result;
   }
 }
