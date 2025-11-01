@@ -104,7 +104,7 @@ export const NoteList: React.FC<NoteListProps> = ({
           <Hash className="h-5 w-5 text-muted-foreground" />
           <h1 className="font-semibold text-foreground text-lg">notes</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 relative z-20">
           <span className="text-muted-foreground text-xs" data-testid="note-list-count">
             {filteredNotes.length} notes
           </span>
