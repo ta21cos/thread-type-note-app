@@ -108,11 +108,11 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
 
   return (
     <div
-      className="flex w-full flex-col border-l border-border bg-background"
+      className="flex w-full h-full flex-col bg-background"
       data-testid="thread-view"
     >
       {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b border-border px-4">
+      <div className="flex h-14 items-center justify-between border-b border-border px-4 flex-shrink-0">
         <h3 className="font-semibold text-foreground text-sm">Thread</h3>
         <Button size="icon" variant="ghost" className="h-8 w-8">
           <X className="h-4 w-4" />
@@ -120,7 +120,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
       </div>
 
       {/* Original Message */}
-      <div className="border-b border-border p-4">
+      <div className="border-b border-border p-4 flex-shrink-0">
         <div className="group relative space-y-2" data-testid="thread-node">
           <div className="absolute top-0 right-0 opacity-0 transition-opacity group-hover:opacity-100">
             <DropdownMenu>
@@ -416,7 +416,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
       </ScrollArea>
 
       {/* Reply Input */}
-      <div className="border-t border-border p-4" data-testid="thread-reply-input">
+      <div className="border-t border-border p-4 flex-shrink-0" data-testid="thread-reply-input">
         <div className="flex items-end gap-2">
           <div className="flex-1 rounded-lg border border-input bg-card">
             <Input

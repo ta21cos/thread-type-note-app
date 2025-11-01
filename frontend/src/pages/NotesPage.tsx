@@ -86,7 +86,7 @@ export const NotesPage: React.FC = () => {
   const displayNotes = notesData?.pages.flatMap((page) => page.notes) || [];
 
   return (
-    <div className="notes-page">
+    <div className="h-full w-full">
       {/* NOTE: Split view layout */}
       <SplitView
         left={
@@ -101,7 +101,7 @@ export const NotesPage: React.FC = () => {
           />
         }
         right={
-          <div className="notes-page__right">
+          <div className="h-full w-full flex flex-col">
             {selectedNoteId && noteData?.note ? (
               <ThreadView
                 rootNote={noteData.note}
@@ -134,13 +134,15 @@ export const NotesPage: React.FC = () => {
                 }}
               />
             ) : noteLoading ? (
-              <div className="notes-page__loading">
-                <div className="spinner" />
-                <p>Loading thread...</p>
+              <div className="flex h-full items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  <p className="text-muted-foreground text-sm">Loading thread...</p>
+                </div>
               </div>
             ) : (
-              <div className="notes-page__empty">
-                <p>Select a note to view its thread</p>
+              <div className="flex h-full items-center justify-center">
+                <p className="text-muted-foreground text-sm">Select a note to view its thread</p>
               </div>
             )}
           </div>
