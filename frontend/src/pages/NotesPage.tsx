@@ -15,12 +15,7 @@ import { useNotesUI } from '../store/notes.store';
 export const NotesPage: React.FC = () => {
   const { noteId } = useParams<{ noteId?: string }>();
   const navigate = useNavigate();
-  const {
-    selectedNoteId,
-    setSelectedNoteId,
-    replyingToNoteId,
-    stopReply,
-  } = useNotesUI();
+  const { selectedNoteId, setSelectedNoteId, replyingToNoteId, stopReply } = useNotesUI();
 
   // NOTE: Fetch notes with infinite scroll
   const {
@@ -53,6 +48,12 @@ export const NotesPage: React.FC = () => {
   const handleNoteSelect = (id: string) => {
     setSelectedNoteId(id);
     navigate(`/notes/${id}`);
+  };
+
+  // NOTE: Close thread view (mobile navigation)
+  const handleCloseThread = () => {
+    setSelectedNoteId(null);
+    navigate('/');
   };
 
   // NOTE: Create new note or reply
@@ -89,6 +90,8 @@ export const NotesPage: React.FC = () => {
     <div className="h-full w-full">
       {/* NOTE: Split view layout */}
       <SplitView
+        showRight={!!selectedNoteId}
+        onCloseRight={handleCloseThread}
         left={
           <NoteList
             notes={displayNotes}
@@ -106,6 +109,7 @@ export const NotesPage: React.FC = () => {
               <ThreadView
                 rootNote={noteData.note}
                 thread={noteData.thread || []}
+                onClose={handleCloseThread}
                 onReply={async (parentId: string, content: string) => {
                   await createNote.mutateAsync({
                     content,
@@ -125,8 +129,7 @@ export const NotesPage: React.FC = () => {
 
                     // NOTE: Clear selection if deleted note was selected
                     if (selectedNoteId === noteId) {
-                      setSelectedNoteId(null);
-                      navigate('/');
+                      handleCloseThread();
                     }
                   } catch (error) {
                     console.error('Failed to delete note:', error);

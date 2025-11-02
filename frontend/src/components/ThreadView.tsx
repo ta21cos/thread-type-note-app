@@ -11,6 +11,7 @@ import {
   Link2,
   Edit,
   Pin,
+  ArrowLeft,
 } from 'lucide-react';
 import { Note } from '../../../shared/types';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getRelativeTime } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import NoteEditor from './NoteEditor';
 
 interface ThreadViewProps {
@@ -32,6 +34,7 @@ interface ThreadViewProps {
   onEdit: (noteId: string, content: string) => Promise<void>;
   onDelete: (noteId: string) => Promise<void>;
   currentUserId?: string;
+  onClose?: () => void;
 }
 
 export const ThreadView: React.FC<ThreadViewProps> = ({
@@ -41,11 +44,13 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
   onEdit,
   onDelete,
   currentUserId: _currentUserId,
+  onClose,
 }) => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
+  const isMobile = !useMediaQuery('(min-width: 1024px)');
 
   const copyLink = (noteId: string) => {
     navigator.clipboard.writeText(`${window.location.origin}/notes/${noteId}`);
@@ -107,16 +112,28 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
   }, [thread, rootNote.id]);
 
   return (
-    <div
-      className="flex w-full h-full flex-col bg-background"
-      data-testid="thread-view"
-    >
+    <div className="flex w-full h-full flex-col bg-background" data-testid="thread-view">
       {/* Header */}
       <div className="flex h-14 items-center justify-between border-b border-border px-4 flex-shrink-0">
-        <h3 className="font-semibold text-foreground text-sm">Thread</h3>
-        <Button size="icon" variant="ghost" className="h-8 w-8">
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {isMobile && onClose && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={onClose}
+              aria-label="Back to notes"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
+          <h3 className="font-semibold text-foreground text-sm">Thread</h3>
+        </div>
+        {!isMobile && onClose && (
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Original Message */}
