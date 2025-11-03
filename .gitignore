@@ -26,6 +26,10 @@ __pycache__/
 *.dll
 *.exe
 
+# Electron build output
+release/
+dist-electron/
+
 # IDE files
 .vscode/
 .idea/
@@ -39,8 +43,6 @@ __pycache__/
 .env.test
 .env.local
 .env.*.local
-.env.production
-.env.staging
 
 # Logs
 logs/
