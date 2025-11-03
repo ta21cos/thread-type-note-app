@@ -43,9 +43,6 @@ dist-electron/
 .env.test
 .env.local
 .env.*.local
-.env.production
-.env.staging
-.env.electron.local
 
 # Logs
 logs/
