@@ -6,7 +6,25 @@ import { setDb, type Database } from './db';
 // NOTE: Cloudflare Workers environment bindings
 export type Bindings = {
   DB: D1Database;
+  AUTH_KV: KVNamespace;
+  RATE_LIMIT_KV: KVNamespace;
   NODE_ENV?: string;
+
+  // Auth0 / IDP configuration
+  IDP_ISSUER?: string;
+  IDP_CLIENT_ID?: string;
+  IDP_CLIENT_SECRET?: string;
+  IDP_AUTHORIZE_URL?: string;
+  IDP_TOKEN_URL?: string;
+  IDP_USERINFO_URL?: string;
+  IDP_JWKS_URL?: string;
+
+  // Self OIDC configuration
+  SELF_ISSUER?: string;
+  SELF_CALLBACK_URL?: string;
+  ACCESS_TOKEN_TTL_SEC?: string;
+  REFRESH_TOKEN_TTL_SEC?: string;
+  ALLOWED_REDIRECT_URIS?: string;
 };
 
 // NOTE: Create Hono app with D1 binding support

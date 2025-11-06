@@ -24,6 +24,7 @@
     "@hono/zod-validator": "^0.1.11",
     "drizzle-orm": "^0.44.7",
     "hono": "^3.11.7",
+    "jose": "^5.2.0",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
     "zod": "^3.22.4"
