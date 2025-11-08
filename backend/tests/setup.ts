@@ -7,6 +7,10 @@ import * as schema from '../src/db';
 export default async function setup() {
   const DATABASE_URL = process.env.DATABASE_URL || 'data/test.db';
   const sqlite = new Database(DATABASE_URL);
+
+  // NOTE: Enable foreign key constraints for SQLite
+  sqlite.exec('PRAGMA foreign_keys = ON');
+
   const database = drizzle(sqlite, { schema });
   setDb(database);
 }
