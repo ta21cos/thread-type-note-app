@@ -14,28 +14,21 @@ interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-// NOTE: Detect if running in Electron
-const isElectron = typeof window !== 'undefined' &&
-  (window as typeof window & { electron?: { platform: string } }).electron !== undefined
+if (!import.meta.env.VITE_BACKEND_API_ENDPOINT) {
+  throw new Error('VITE_BACKEND_API_ENDPOINT is not set');
+}
 
 // NOTE: In Electron, use full backend URL (can't use relative paths)
-const API_BASE_URL = isElectron
-  ? import.meta.env.VITE_BACKEND_API_ENDPOINT || 'http://localhost:3000/api'
-  : import.meta.env.VITE_BACKEND_API_ENDPOINT
-    ? `${import.meta.env.VITE_BACKEND_API_ENDPOINT}/api`
-    : '/api';
+const API_BASE_URL = `${import.meta.env.VITE_BACKEND_API_ENDPOINT}/api`;
 
 // NOTE: Build URL with query parameters
 const buildUrl = (
   path: string,
   params?: Record<string, string | number | boolean | undefined>
 ): string => {
-  // NOTE: For Electron, API_BASE_URL is already absolute
-  const baseUrl = isElectron
-    ? API_BASE_URL
-    : window.location.origin;
-
-  const url = new URL(path, baseUrl);
+  // NOTE: If path is already absolute (starts with http), use it directly
+  // Otherwise, use window.location.origin as base for relative paths
+  const url = path.startsWith('http') ? new URL(path) : new URL(path, window.location.origin);
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
