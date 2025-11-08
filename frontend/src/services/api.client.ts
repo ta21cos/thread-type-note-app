@@ -13,23 +13,9 @@ export class ApiError extends Error {
   }
 }
 
-// NOTE: Detect if running in Electron
-const isElectron = typeof window !== 'undefined' &&
-  (window as typeof window & { electron?: { platform: string } }).electron !== undefined
+if (!import.meta.env.VITE_BACKEND_API_ENDPOINT) {
+  throw new Error('VITE_BACKEND_API_ENDPOINT is not set');
+}
 
-// NOTE: In Electron, use full backend URL (can't use relative paths)
-const getBaseUrl = (): string => {
-  if (isElectron) {
-    return import.meta.env.VITE_BACKEND_API_ENDPOINT || 'http://localhost:3000';
-  }
-
-  if (import.meta.env.VITE_BACKEND_API_ENDPOINT) {
-    return import.meta.env.VITE_BACKEND_API_ENDPOINT;
-  }
-
-  // NOTE: For web, use same origin
-  return typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-};
-
-// NOTE: Create typed RPC client
-export const client = hc<AppType>(getBaseUrl());
+// NOTE: Create typed RPC client with backend API endpoint
+export const client = hc<AppType>(import.meta.env.VITE_BACKEND_API_ENDPOINT);
