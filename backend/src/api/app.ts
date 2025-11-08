@@ -26,4 +26,7 @@ app.get('/health', (c) => {
 // Error handling
 app.onError(errorHandler);
 
+// NOTE: Export AppType for Hono RPC client type safety
+export type AppType = typeof app;
+
 export default app;

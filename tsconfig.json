@@ -14,7 +14,8 @@
     "types": ["@types/bun"],
     "paths": {
       "@thread-note/shared/constants": ["./shared/constants/index.ts"],
-      "@thread-note/shared/types": ["./shared/types/index.ts"]
+      "@thread-note/shared/types": ["./shared/types/index.ts"],
+      "@thread-note/backend/api": ["./backend/src/api/app.ts"]
     }
   }
 }
