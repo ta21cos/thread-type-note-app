@@ -1,8 +1,6 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "f55acaa7-ef35-434d-9395-005f4f7c1800",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "mentions": {
       "name": "mentions",
@@ -59,32 +57,33 @@
         "mentions_from_note_id_notes_id_fk": {
           "name": "mentions_from_note_id_notes_id_fk",
           "tableFrom": "mentions",
-          "tableTo": "notes",
           "columnsFrom": [
             "from_note_id"
           ],
+          "tableTo": "notes",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "mentions_to_note_id_notes_id_fk": {
           "name": "mentions_to_note_id_notes_id_fk",
           "tableFrom": "mentions",
-          "tableTo": "notes",
           "columnsFrom": [
             "to_note_id"
           ],
+          "tableTo": "notes",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "notes": {
       "name": "notes",
@@ -140,19 +139,20 @@
         "notes_parent_id_notes_id_fk": {
           "name": "notes_parent_id_notes_id_fk",
           "tableFrom": "notes",
-          "tableTo": "notes",
           "columnsFrom": [
             "parent_id"
           ],
+          "tableTo": "notes",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "search_index": {
       "name": "search_index",
@@ -199,25 +199,28 @@
         "search_index_note_id_notes_id_fk": {
           "name": "search_index_note_id_notes_id_fk",
           "tableFrom": "search_index",
-          "tableTo": "notes",
           "columnsFrom": [
             "note_id"
           ],
+          "tableTo": "notes",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "_meta": {
-    "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "f55acaa7-ef35-434d-9395-005f4f7c1800",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "views": {}
 }

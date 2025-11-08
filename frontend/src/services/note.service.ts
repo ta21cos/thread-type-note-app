@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { api } from './api.client';
+import { client } from './api.client';
 import type { Note } from '../../../shared/types';
 
 // NOTE: API response types
@@ -45,8 +45,11 @@ export const useNotes = () => {
   return useQuery({
     queryKey: noteKeys.lists(),
     queryFn: async () => {
-      const response = await api.get<NotesListResponse>('/notes');
-      return response;
+      const res = await client.api.notes.$get();
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return await res.json();
     },
     staleTime: 1000 * 60 * 1, // 1 minute
   });
@@ -57,11 +60,16 @@ export const useInfiniteNotes = (limit: number = 20) => {
   return useInfiniteQuery({
     queryKey: [...noteKeys.lists(), { limit }],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await api.get<NotesListResponse>('/notes', {
-        offset: pageParam,
-        limit,
+      const res = await client.api.notes.$get({
+        query: {
+          offset: String(pageParam),
+          limit: String(limit),
+        },
       });
-      return response;
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return await res.json();
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.hasMore) return undefined;
@@ -77,8 +85,13 @@ export const useNote = (id: string | undefined) => {
   return useQuery({
     queryKey: noteKeys.detail(id!),
     queryFn: async () => {
-      const response = await api.get<NoteWithThreadResponse>(`/notes/${id}`);
-      return response;
+      const res = await client.api.notes[':id'].$get({
+        param: { id: id! },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return await res.json();
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 1,
@@ -90,8 +103,13 @@ export const useSearchNotes = (query: string, type: 'content' | 'mention' = 'con
   return useQuery({
     queryKey: noteKeys.search(query, type),
     queryFn: async () => {
-      const response = await api.get<SearchResponse>('/notes/search', { q: query, type });
-      return response;
+      const res = await client.api.notes.search.$get({
+        query: { q: query, type },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return await res.json();
     },
     enabled: query.length > 0,
     staleTime: 1000 * 30, // 30 seconds
@@ -103,8 +121,13 @@ export const useNoteMentions = (id: string | undefined) => {
   return useQuery({
     queryKey: noteKeys.mentions(id!),
     queryFn: async () => {
-      const response = await api.get<{ mentions: Note[] }>(`/notes/${id}/mentions`);
-      return response;
+      const res = await client.api.notes[':id'].mentions.$get({
+        param: { id: id! },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return await res.json();
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 1,
@@ -117,8 +140,13 @@ export const useCreateNote = () => {
 
   return useMutation({
     mutationFn: async ({ content, parentId }: CreateNoteDto) => {
-      const response = await api.post<Note>('/notes', { content, parentId });
-      return response;
+      const res = await client.api.notes.$post({
+        json: { content, parentId },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return await res.json();
     },
     onSuccess: (newNote) => {
       // NOTE: Refetch notes list immediately to get updated replyCount
@@ -138,8 +166,14 @@ export const useUpdateNote = () => {
 
   return useMutation({
     mutationFn: async ({ id, content }: { id: string } & UpdateNoteDto) => {
-      const response = await api.put<Note>(`/notes/${id}`, { content });
-      return response;
+      const res = await client.api.notes[':id'].$put({
+        param: { id },
+        json: { content },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      return await res.json();
     },
     onMutate: async ({ id, content }) => {
       // NOTE: Cancel outgoing refetches
@@ -182,7 +216,12 @@ export const useDeleteNote = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/notes/${id}`);
+      const res = await client.api.notes[':id'].$delete({
+        param: { id },
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
       return id;
     },
     onSuccess: (deletedId) => {
