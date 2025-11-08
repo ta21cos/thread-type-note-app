@@ -8,6 +8,7 @@ import {
   validateNoteId,
   validatePagination,
 } from '../middleware/validation';
+import { requireAuth } from '../../auth/middleware/auth.middleware';
 import type {
   NoteListResponse,
   NoteDetailResponse,
@@ -30,7 +31,7 @@ app.get('/', validatePagination, async (c) => {
 });
 
 // POST /api/notes - Create note
-app.post('/', validateCreateNote, async (c) => {
+app.post('/', requireAuth, validateCreateNote, async (c) => {
   const data = c.req.valid('json');
   const note = await noteService.createNote(data);
   return c.json(note, 201);
@@ -65,7 +66,7 @@ app.get('/:id', validateNoteId, async (c) => {
 });
 
 // PUT /api/notes/:id - Update note
-app.put('/:id', validateNoteId, validateUpdateNote, async (c) => {
+app.put('/:id', requireAuth, validateNoteId, validateUpdateNote, async (c) => {
   const { id } = c.req.valid('param');
   const data = c.req.valid('json');
 
@@ -74,7 +75,7 @@ app.put('/:id', validateNoteId, validateUpdateNote, async (c) => {
 });
 
 // DELETE /api/notes/:id - Delete note (cascade)
-app.delete('/:id', validateNoteId, async (c) => {
+app.delete('/:id', requireAuth, validateNoteId, async (c) => {
   const { id } = c.req.valid('param');
   await deleteService.deleteNote(id);
   return c.body(null, 204);
