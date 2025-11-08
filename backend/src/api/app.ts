@@ -26,4 +26,7 @@ app.get('/health', (c) => {
 // Error handling
 app.onError(errorHandler);
 
+// NOTE: Export AppType for RPC client
+export type AppType = typeof app;
+
 export default app;
