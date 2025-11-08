@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
 import { eq } from 'drizzle-orm';
 
+const API_BASE_URL = process.env.API_BASE_URL;
+
 // NOTE: Contract test for GET /api/notes/:id (get note with thread)
 describe('GET /api/notes/:id', () => {
   beforeAll(async () => {
@@ -19,7 +21,7 @@ describe('GET /api/notes/:id', () => {
   });
 
   it('should return note details with thread', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/abc123?includeThread=true');
+    const response = await fetch(`${API_BASE_URL}/api/notes/abc123?includeThread=true`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -29,7 +31,7 @@ describe('GET /api/notes/:id', () => {
   });
 
   it('should return only note without thread when includeThread=false', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/abc123?includeThread=false');
+    const response = await fetch(`${API_BASE_URL}/api/notes/abc123?includeThread=false`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -38,13 +40,13 @@ describe('GET /api/notes/:id', () => {
   });
 
   it('should return 404 for non-existent note', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/999999');
+    const response = await fetch(`${API_BASE_URL}/api/notes/999999`);
 
     expect(response.status).toBe(404);
   });
 
   it('should validate ID format (6-char alphanumeric)', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/invalid-id');
+    const response = await fetch(`${API_BASE_URL}/api/notes/invalid-id`);
 
     expect(response.status).toBe(400);
   });

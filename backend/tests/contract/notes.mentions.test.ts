@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
 
+const API_BASE_URL = process.env.API_BASE_URL;
+
 // NOTE: Contract test for GET /api/notes/:id/mentions (get notes mentioning this note)
 describe('GET /api/notes/:id/mentions', () => {
   beforeAll(async () => {
@@ -23,7 +25,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should return list of notes mentioning the specified note', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/abc123/mentions');
+    const response = await fetch(`${API_BASE_URL}/api/notes/abc123/mentions`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -32,7 +34,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should include note object and position in each mention', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/abc123/mentions');
+    const response = await fetch(`${API_BASE_URL}/api/notes/abc123/mentions`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -44,7 +46,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should return empty array for note with no mentions', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/noment/mentions');
+    const response = await fetch(`${API_BASE_URL}/api/notes/noment/mentions`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -52,7 +54,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should return 404 for non-existent note', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/999999/mentions');
+    const response = await fetch(`${API_BASE_URL}/api/notes/999999/mentions`);
 
     expect(response.status).toBe(404);
   });
