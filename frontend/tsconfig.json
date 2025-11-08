@@ -6,7 +6,9 @@
     "types": ["vite/client", "vitest/globals", "@playwright/test"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@thread-note/shared/constants": ["../shared/constants/index.ts"],
+      "@thread-note/shared/types": ["../shared/types/index.ts"]
     }
   },
   "include": ["src/**/*", "tests/**/*"],
