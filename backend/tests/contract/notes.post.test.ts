@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
 
+const API_BASE_URL = process.env.API_BASE_URL;
+
 // NOTE: Contract test for POST /api/notes (create note)
 describe('POST /api/notes', () => {
   beforeAll(async () => {
@@ -14,7 +16,7 @@ describe('POST /api/notes', () => {
     }).onConflictDoNothing();
   });
   it('should create a new root note', async () => {
-    const response = await fetch('http://localhost:3000/api/notes', {
+    const response = await fetch(`${API_BASE_URL}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: 'Test note' }),
@@ -29,7 +31,7 @@ describe('POST /api/notes', () => {
   });
 
   it('should create a reply note with parentId', async () => {
-    const response = await fetch('http://localhost:3000/api/notes', {
+    const response = await fetch(`${API_BASE_URL}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -46,7 +48,7 @@ describe('POST /api/notes', () => {
 
   it('should reject note exceeding 1000 characters', async () => {
     const longContent = 'a'.repeat(1001);
-    const response = await fetch('http://localhost:3000/api/notes', {
+    const response = await fetch(`${API_BASE_URL}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: longContent }),
@@ -56,7 +58,7 @@ describe('POST /api/notes', () => {
   });
 
   it('should reject empty content', async () => {
-    const response = await fetch('http://localhost:3000/api/notes', {
+    const response = await fetch(`${API_BASE_URL}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: '' }),
@@ -66,7 +68,7 @@ describe('POST /api/notes', () => {
   });
 
   it('should validate parentId format (6-char alphanumeric)', async () => {
-    const response = await fetch('http://localhost:3000/api/notes', {
+    const response = await fetch(`${API_BASE_URL}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

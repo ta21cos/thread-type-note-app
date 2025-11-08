@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { db, notes } from '../../src/db';
 
+const API_BASE_URL = process.env.API_BASE_URL;
+
 // NOTE: Contract test for DELETE /api/notes/:id (delete note with cascade)
 describe('DELETE /api/notes/:id', () => {
   beforeEach(async () => {
@@ -33,7 +35,7 @@ describe('DELETE /api/notes/:id', () => {
   });
 
   it('should delete note and return 204', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/abc123', {
+    const response = await fetch(`${API_BASE_URL}/api/notes/abc123`, {
       method: 'DELETE',
     });
 
@@ -42,17 +44,17 @@ describe('DELETE /api/notes/:id', () => {
 
   it('should cascade delete all child notes', async () => {
     // Delete parent
-    await fetch('http://localhost:3000/api/notes/prnt23', {
+    await fetch(`${API_BASE_URL}/api/notes/prnt23`, {
       method: 'DELETE',
     });
 
     // Verify children are also deleted
-    const childResponse = await fetch('http://localhost:3000/api/notes/chld56');
+    const childResponse = await fetch(`${API_BASE_URL}/api/notes/chld56`);
     expect(childResponse.status).toBe(404);
   });
 
   it('should return 404 for non-existent note', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/999999', {
+    const response = await fetch(`${API_BASE_URL}/api/notes/999999`, {
       method: 'DELETE',
     });
 

@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
 
+const API_BASE_URL = process.env.API_BASE_URL;
+
 // NOTE: Contract test for GET /api/notes (list root notes)
 describe('GET /api/notes', () => {
   beforeAll(async () => {
@@ -33,7 +35,7 @@ describe('GET /api/notes', () => {
     }).onConflictDoNothing();
   });
   it('should return paginated list of root notes', async () => {
-    const response = await fetch('http://localhost:3000/api/notes?limit=20&offset=0');
+    const response = await fetch(`${API_BASE_URL}/api/notes?limit=20&offset=0`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -44,7 +46,7 @@ describe('GET /api/notes', () => {
   });
 
   it('should respect limit parameter (max 100)', async () => {
-    const response = await fetch('http://localhost:3000/api/notes?limit=5');
+    const response = await fetch(`${API_BASE_URL}/api/notes?limit=5`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -52,7 +54,7 @@ describe('GET /api/notes', () => {
   });
 
   it('should return only root notes (no parent)', async () => {
-    const response = await fetch('http://localhost:3000/api/notes');
+    const response = await fetch(`${API_BASE_URL}/api/notes`);
     const data = await response.json();
 
     data.notes.forEach((note: any) => {

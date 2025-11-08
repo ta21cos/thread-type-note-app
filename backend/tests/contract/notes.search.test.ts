@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
 import { sql } from 'drizzle-orm';
 
+const API_BASE_URL = process.env.API_BASE_URL;
+
 // NOTE: Contract test for GET /api/notes/search (search notes)
 describe('GET /api/notes/search', () => {
   beforeAll(async () => {
@@ -48,7 +50,7 @@ describe('GET /api/notes/search', () => {
     `);
   });
   it('should search notes by content', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/search?q=test&type=content');
+    const response = await fetch(`${API_BASE_URL}/api/notes/search?q=test&type=content`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -58,7 +60,7 @@ describe('GET /api/notes/search', () => {
   });
 
   it('should search notes by mention', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/search?q=abc123&type=mention');
+    const response = await fetch(`${API_BASE_URL}/api/notes/search?q=abc123&type=mention`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -66,7 +68,7 @@ describe('GET /api/notes/search', () => {
   });
 
   it('should default to content search when type not specified', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/search?q=test');
+    const response = await fetch(`${API_BASE_URL}/api/notes/search?q=test`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -74,7 +76,7 @@ describe('GET /api/notes/search', () => {
   });
 
   it('should respect limit parameter (default 20)', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/search?q=test&limit=5');
+    const response = await fetch(`${API_BASE_URL}/api/notes/search?q=test&limit=5`);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -82,7 +84,7 @@ describe('GET /api/notes/search', () => {
   });
 
   it('should require query parameter', async () => {
-    const response = await fetch('http://localhost:3000/api/notes/search');
+    const response = await fetch(`${API_BASE_URL}/api/notes/search`);
 
     expect(response.status).toBe(400);
   });
