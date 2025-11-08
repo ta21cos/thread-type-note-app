@@ -12,6 +12,7 @@ export class ApiError extends Error {
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
+  token?: string | null;
 }
 
 if (!import.meta.env.VITE_BACKEND_API_ENDPOINT) {
@@ -44,15 +45,22 @@ const buildUrl = (
 // NOTE: Generic fetch wrapper with error handling
 export const apiFetch = async <T>(
   endpoint: string,
-  { params, ...options }: FetchOptions = {}
+  { params, token, ...options }: FetchOptions = {}
 ): Promise<T> => {
   const url = buildUrl(`${API_BASE_URL}${endpoint}`, params);
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  // NOTE: Add Authorization header if token provided
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
     ...options,
   });
 
