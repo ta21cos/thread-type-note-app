@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from 'vitest';
+import type { ClerkClient } from '@clerk/backend';
 import app from '../../src/api/app';
 import { db } from '../../src/db';
 import { profiles } from '../../src/models/profile.schema';
@@ -21,13 +22,15 @@ beforeAll(() => {
   process.env.CLERK_PUBLISHABLE_KEY = 'pk_test_mock';
 });
 
-vi.mock('../../src/auth/clerk', () => ({
-  clerkClient: {
-    authenticateRequest: vi.fn(),
-  },
-}));
+// NOTE: Mock the getClerkClient function
+const mockAuthenticateRequest = vi.fn();
+const mockClerkClient: Partial<ClerkClient> = {
+  authenticateRequest: mockAuthenticateRequest,
+};
 
-import { clerkClient } from '../../src/auth/clerk';
+vi.mock('../../src/auth/clerk', () => ({
+  getClerkClient: () => mockClerkClient,
+}));
 
 describe('POST /api/users/sync', () => {
   beforeEach(async () => {
@@ -36,8 +39,7 @@ describe('POST /api/users/sync', () => {
     vi.clearAllMocks();
 
     // NOTE: Mock successful authentication by default
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (clerkClient.authenticateRequest as any).mockResolvedValue({
+    mockAuthenticateRequest.mockResolvedValue({
       isAuthenticated: true,
       toAuth: () => ({ userId: 'user_test', sessionId: 'sess_test' }),
     });
@@ -50,8 +52,7 @@ describe('POST /api/users/sync', () => {
 
   it('should require authentication', async () => {
     // NOTE: Mock failed authentication
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (clerkClient.authenticateRequest as any).mockResolvedValue({
+    mockAuthenticateRequest.mockResolvedValue({
       isAuthenticated: false,
       reason: 'token-invalid',
       message: 'Invalid token',

@@ -1,14 +1,33 @@
-import { createClerkClient } from '@clerk/backend';
+import { createClerkClient, type ClerkClient } from '@clerk/backend';
 
-if (!process.env.CLERK_SECRET_KEY) {
-  throw new Error('CLERK_SECRET_KEY is required');
+let _clerkClient: ClerkClient | null = null;
+
+export interface ClerkEnv {
+  CLERK_SECRET_KEY: string;
+  CLERK_PUBLISHABLE_KEY: string;
 }
 
-if (!process.env.CLERK_PUBLISHABLE_KEY) {
-  throw new Error('CLERK_PUBLISHABLE_KEY is required');
-}
+// NOTE: Lazy initialization for Cloudflare Workers compatibility
+export const getClerkClient = (env: ClerkEnv): ClerkClient => {
+  if (_clerkClient) {
+    return _clerkClient;
+  }
 
-export const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-});
+  const secretKey = env.CLERK_SECRET_KEY;
+  const publishableKey = env.CLERK_PUBLISHABLE_KEY;
+
+  if (!secretKey) {
+    throw new Error('CLERK_SECRET_KEY is required');
+  }
+
+  if (!publishableKey) {
+    throw new Error('CLERK_PUBLISHABLE_KEY is required');
+  }
+
+  _clerkClient = createClerkClient({
+    secretKey,
+    publishableKey,
+  });
+
+  return _clerkClient;
+};

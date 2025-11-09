@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
 import { Hono } from 'hono';
+import type { ClerkClient } from '@clerk/backend';
 
 // NOTE: Set env vars before importing clerk module
 beforeAll(() => {
@@ -7,15 +8,17 @@ beforeAll(() => {
   process.env.CLERK_PUBLISHABLE_KEY = 'pk_test_mock';
 });
 
-// NOTE: Mock the clerk client before importing middleware
+// NOTE: Mock the getClerkClient function
+const mockAuthenticateRequest = vi.fn();
+const mockClerkClient: Partial<ClerkClient> = {
+  authenticateRequest: mockAuthenticateRequest,
+};
+
 vi.mock('../../src/auth/clerk', () => ({
-  clerkClient: {
-    authenticateRequest: vi.fn(),
-  },
+  getClerkClient: () => mockClerkClient,
 }));
 
 import { requireAuth, optionalAuth } from '../../src/auth/middleware/auth.middleware';
-import { clerkClient } from '../../src/auth/clerk';
 
 describe('Authentication Middleware', () => {
   let app: Hono;
@@ -27,7 +30,7 @@ describe('Authentication Middleware', () => {
 
   describe('requireAuth', () => {
     it('should return 401 when not authenticated', async () => {
-      (clerkClient.authenticateRequest as any).mockResolvedValue({
+      mockAuthenticateRequest.mockResolvedValue({
         isAuthenticated: false,
         reason: 'token-invalid',
         message: 'Invalid token',
@@ -48,7 +51,7 @@ describe('Authentication Middleware', () => {
     });
 
     it('should set userId in context when authenticated', async () => {
-      (clerkClient.authenticateRequest as any).mockResolvedValue({
+      mockAuthenticateRequest.mockResolvedValue({
         isAuthenticated: true,
         toAuth: () => ({ userId: 'user_123', sessionId: 'sess_456' }),
       });
@@ -70,7 +73,7 @@ describe('Authentication Middleware', () => {
     });
 
     it('should return 401 when userId is missing', async () => {
-      (clerkClient.authenticateRequest as any).mockResolvedValue({
+      mockAuthenticateRequest.mockResolvedValue({
         isAuthenticated: true,
         toAuth: () => ({ userId: null, sessionId: 'sess_456' }),
       });
@@ -87,7 +90,7 @@ describe('Authentication Middleware', () => {
 
   describe('optionalAuth', () => {
     it('should continue without auth when not authenticated', async () => {
-      (clerkClient.authenticateRequest as any).mockResolvedValue({
+      mockAuthenticateRequest.mockResolvedValue({
         isAuthenticated: false,
         toAuth: () => ({ userId: null, sessionId: null }),
       });
@@ -106,7 +109,7 @@ describe('Authentication Middleware', () => {
     });
 
     it('should set userId when authenticated', async () => {
-      (clerkClient.authenticateRequest as any).mockResolvedValue({
+      mockAuthenticateRequest.mockResolvedValue({
         isAuthenticated: true,
         toAuth: () => ({ userId: 'user_789', sessionId: 'sess_101' }),
       });

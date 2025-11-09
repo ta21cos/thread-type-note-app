@@ -34,6 +34,15 @@ database_name = "thread-notes-db-staging"
 database_id = "acfb6ef5-b62e-4858-b956-e46965bdfb92"
 migrations_dir = "drizzle"
 
+[env.development]
+name = "thread-note-backend-development"
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "thread-notes-db-development"
+database_id = "fe484504-7fd1-4f7a-8a1f-a8e002eb9f84"
+migrations_dir = "drizzle"
+
 # NOTE: Observability
 [observability]
 enabled = true

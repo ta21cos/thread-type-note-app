@@ -7,10 +7,20 @@ import { setDb, type Database } from './db';
 export type Bindings = {
   DB: D1Database;
   NODE_ENV?: string;
+
+  CLERK_SECRET_KEY: string;
+  CLERK_PUBLISHABLE_KEY: string;
+  ALLOWED_ORIGINS: string;
+  APP_DOMAIN: string;
+};
+
+export type Variables = {
+  userId?: string;
+  sessionId?: string;
 };
 
 // NOTE: Create Hono app with D1 binding support
-const worker = new Hono<{ Bindings: Bindings }>();
+const worker = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // NOTE: Middleware to initialize D1 database per request
 // In Cloudflare Workers, we initialize DB for each request as Workers can be distributed
