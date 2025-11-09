@@ -1,12 +1,13 @@
 import { Hono } from 'hono';
 import { mentionService } from '../../services/mention.service';
 import { validateNoteId } from '../middleware/validation';
+import { requireAuth } from '../../auth/middleware/auth.middleware';
 import type { MentionsResponse } from '@thread-note/shared/types';
 
 const app = new Hono();
 
 // GET /api/notes/:id/mentions - Get notes mentioning this note
-app.get('/:id/mentions', validateNoteId, async (c) => {
+app.get('/:id/mentions', requireAuth, validateNoteId, async (c) => {
   const { id } = c.req.valid('param');
 
   // NOTE: Check if note exists first

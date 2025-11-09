@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { api } from './api.client';
 import { useApiClient } from '../hooks/useApiClient';
 import type { Note } from '../../../shared/types';
 
@@ -43,10 +42,12 @@ export const noteKeys = {
 
 // NOTE: Fetch all root notes
 export const useNotes = () => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.lists(),
     queryFn: async () => {
-      const response = await api.get<NotesListResponse>('/notes');
+      const response = await get<NotesListResponse>('/notes');
       return response;
     },
     staleTime: 1000 * 60 * 1, // 1 minute
@@ -55,10 +56,12 @@ export const useNotes = () => {
 
 // NOTE: Fetch notes with infinite scroll
 export const useInfiniteNotes = (limit: number = 20) => {
+  const { get } = useApiClient();
+
   return useInfiniteQuery({
     queryKey: [...noteKeys.lists(), { limit }],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await api.get<NotesListResponse>('/notes', {
+      const response = await get<NotesListResponse>('/notes', {
         offset: pageParam,
         limit,
       });
@@ -75,10 +78,12 @@ export const useInfiniteNotes = (limit: number = 20) => {
 
 // NOTE: Fetch single note with thread
 export const useNote = (id: string | undefined) => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.detail(id!),
     queryFn: async () => {
-      const response = await api.get<NoteWithThreadResponse>(`/notes/${id}`);
+      const response = await get<NoteWithThreadResponse>(`/notes/${id}`);
       return response;
     },
     enabled: !!id,
@@ -88,10 +93,12 @@ export const useNote = (id: string | undefined) => {
 
 // NOTE: Search notes
 export const useSearchNotes = (query: string, type: 'content' | 'mention' = 'content') => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.search(query, type),
     queryFn: async () => {
-      const response = await api.get<SearchResponse>('/notes/search', { q: query, type });
+      const response = await get<SearchResponse>('/notes/search', { q: query, type });
       return response;
     },
     enabled: query.length > 0,
@@ -101,10 +108,12 @@ export const useSearchNotes = (query: string, type: 'content' | 'mention' = 'con
 
 // NOTE: Get notes that mention a specific note
 export const useNoteMentions = (id: string | undefined) => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.mentions(id!),
     queryFn: async () => {
-      const response = await api.get<{ mentions: Note[] }>(`/notes/${id}/mentions`);
+      const response = await get<{ mentions: Note[] }>(`/notes/${id}/mentions`);
       return response;
     },
     enabled: !!id,

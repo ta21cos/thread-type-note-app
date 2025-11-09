@@ -17,7 +17,7 @@ import type {
 const app = new Hono();
 
 // GET /api/notes - List root notes
-app.get('/', validatePagination, async (c) => {
+app.get('/', requireAuth, validatePagination, async (c) => {
   const { limit, offset } = c.req.valid('query');
   const result = await noteService.getRootNotes(limit, offset);
 
@@ -38,7 +38,7 @@ app.post('/', requireAuth, validateCreateNote, async (c) => {
 });
 
 // GET /api/notes/:id - Get note with thread
-app.get('/:id', validateNoteId, async (c) => {
+app.get('/:id', requireAuth, validateNoteId, async (c) => {
   const { id } = c.req.valid('param');
   const includeThread = c.req.query('includeThread') !== 'false';
 
