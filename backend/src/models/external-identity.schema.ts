@@ -1,5 +1,4 @@
 import { sqliteTable, text, integer, unique, AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
 import { profiles } from './profile.schema';
 
 // NOTE: Provider-agnostic auth identity linking with support for CLERK and other OAuth providers

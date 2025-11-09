@@ -1,6 +1,5 @@
 import type { BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import type { SQL } from 'drizzle-orm';
 import type * as schema from '../models/note.schema';
 
 // NOTE: Bun SQLite database type for local development

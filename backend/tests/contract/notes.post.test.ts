@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
+import type { Note } from '@thread-note/shared/types';
+import { fetchJson } from '../helpers/fetch';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -16,12 +18,11 @@ describe('POST /api/notes', () => {
     }).onConflictDoNothing();
   });
   it('should create a new root note', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes`, {
+    const { response, data } = await fetchJson<Note>(`${API_BASE_URL}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: 'Test note' }),
     });
-    const data = await response.json();
 
     expect(response.status).toBe(201);
     expect(data).toHaveProperty('id');
@@ -31,7 +32,7 @@ describe('POST /api/notes', () => {
   });
 
   it('should create a reply note with parentId', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes`, {
+    const { response, data } = await fetchJson<Note>(`${API_BASE_URL}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -39,7 +40,6 @@ describe('POST /api/notes', () => {
         parentId: 'abc123',
       }),
     });
-    const data = await response.json();
 
     expect(response.status).toBe(201);
     expect(data.parentId).toBe('abc123');

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
+import type { NoteListResponse, Note } from '@thread-note/shared/types';
+import { fetchJson } from '../helpers/fetch';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -35,8 +37,7 @@ describe('GET /api/notes', () => {
     }).onConflictDoNothing();
   });
   it('should return paginated list of root notes', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes?limit=20&offset=0`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<NoteListResponse>(`${API_BASE_URL}/api/notes?limit=20&offset=0`);
 
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('notes');
@@ -46,18 +47,16 @@ describe('GET /api/notes', () => {
   });
 
   it('should respect limit parameter (max 100)', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes?limit=5`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<NoteListResponse>(`${API_BASE_URL}/api/notes?limit=5`);
 
     expect(response.status).toBe(200);
     expect(data.notes.length).toBeLessThanOrEqual(5);
   });
 
   it('should return only root notes (no parent)', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<NoteListResponse>(`${API_BASE_URL}/api/notes`);
 
-    data.notes.forEach((note: any) => {
+    data.notes.forEach((note: Note) => {
       expect(note.parentId).toBeNull();
     });
   });

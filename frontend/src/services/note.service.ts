@@ -1,23 +1,26 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { client } from './api.client';
-import type { Note } from '../../../shared/types';
 
-// NOTE: API response types
-interface NotesListResponse {
-  notes: Note[];
-  total: number;
-  hasMore: boolean;
-}
-
+// NOTE: API response type for optimistic updates
 interface NoteWithThreadResponse {
-  note: Note;
-  thread: Note[];
-  depth: number;
-}
-
-interface SearchResponse {
-  results: Note[];
-  total: number;
+  note: {
+    id: string;
+    content: string;
+    parentId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    depth: number;
+    replyCount?: number;
+  };
+  thread: Array<{
+    id: string;
+    content: string;
+    parentId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    depth: number;
+    replyCount?: number;
+  }>;
 }
 
 interface CreateNoteDto {
@@ -45,7 +48,9 @@ export const useNotes = () => {
   return useQuery({
     queryKey: noteKeys.lists(),
     queryFn: async () => {
-      const res = await client.api.notes.$get();
+      const res = await client.api.notes.$get({
+        query: {},
+      });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
@@ -62,8 +67,8 @@ export const useInfiniteNotes = (limit: number = 20) => {
     queryFn: async ({ pageParam = 0 }) => {
       const res = await client.api.notes.$get({
         query: {
-          offset: String(pageParam),
-          limit: String(limit),
+          offset: pageParam,
+          limit: limit,
         },
       });
       if (!res.ok) {

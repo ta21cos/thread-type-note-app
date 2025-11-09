@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
 import { eq } from 'drizzle-orm';
+import type { Note } from '@thread-note/shared/types';
+import { fetchJson } from '../helpers/fetch';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -21,12 +23,11 @@ describe('PUT /api/notes/:id', () => {
   });
 
   it('should update note content', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes/abc123`, {
+    const { response, data } = await fetchJson<Note>(`${API_BASE_URL}/api/notes/abc123`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: 'Updated content' }),
     });
-    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(data.content).toBe('Updated content');
