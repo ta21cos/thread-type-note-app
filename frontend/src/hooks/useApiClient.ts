@@ -5,6 +5,14 @@ interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
+interface ErrorResponse {
+  message?: string;
+}
+
+const isErrorResponse = (value: unknown): value is ErrorResponse => {
+  return typeof value === 'object' && value !== null && 'message' in value;
+};
+
 function createUrl(base: string, path: string): URL {
   return new URL([base.replace(/\/+$/, ''), path.replace(/^\/+/, '')].join('/'), base);
 }
@@ -60,11 +68,14 @@ export const useApiClient = () => {
       return undefined as T;
     }
 
-    const data = await response.json().catch(() => ({}));
+    const data: unknown = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+      const message = isErrorResponse(data)
+        ? data.message
+        : `HTTP ${response.status}: ${response.statusText}`;
       throw new ApiError(
-        data.message || `HTTP ${response.status}: ${response.statusText}`,
+        message || `HTTP ${response.status}: ${response.statusText}`,
         response.status,
         data
       );
