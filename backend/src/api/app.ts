@@ -6,25 +6,20 @@ import searchRoutes from './routes/search';
 import mentionsRoutes from './routes/mentions';
 import { errorHandler } from './middleware/error';
 
-// NOTE: Hono app instance and router setup
-const app = new Hono();
-
-// Middleware
-app.use('*', logger());
-app.use('*', cors());
-
-// Routes - Order matters! Specific routes before generic ones
-app.route('/api/notes', searchRoutes);  // /search route
-app.route('/api/notes', mentionsRoutes); // /:id/mentions route
-app.route('/api/notes', notesRoutes);   // /:id route (must be last)
-
-// NOTE: Health check endpoint for monitoring
-app.get('/health', (c) => {
-  return c.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Error handling
-app.onError(errorHandler);
+// NOTE: Hono app instance and router setup with method chaining for proper type inference
+const app = new Hono()
+  // Middleware
+  .use('*', logger())
+  .use('*', cors())
+  // Routes - Order matters! Specific routes before generic ones
+  .route('/api/notes', searchRoutes)  // /search route
+  .route('/api/notes', mentionsRoutes) // /:id/mentions route
+  .route('/api/notes', notesRoutes)   // /:id route (must be last)
+  // NOTE: Health check endpoint for monitoring
+  .get('/health', (c) => {
+    return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+  })
+  .onError(errorHandler);
 
 // NOTE: Export AppType for RPC client
 export type AppType = typeof app;
