@@ -22,15 +22,15 @@ export const noteIdSchema = z.object({
 export const searchQuerySchema = z.object({
   q: z.string().min(1),
   type: z.enum(['content', 'mention']).default('content'),
-  limit: z.coerce.number().min(1).max(100).default(20),
+  limit: z.string().transform(Number).pipe(z.number().min(1).max(100).default(20)),
 });
 
 export const paginationSchema = z.object({
-  limit: z.coerce.number().min(1).max(100).default(20),
-  offset: z.coerce.number().min(0).default(0),
+  limit: z.string().transform(Number).pipe(z.number().min(1).max(100)),
+  offset: z.string().transform(Number).pipe(z.number().min(0)),
 });
 
-// Export validators
+// NOTE: Export validators - types will be inferred from Hono app context
 export const validateCreateNote = zValidator('json', createNoteSchema);
 export const validateUpdateNote = zValidator('json', updateNoteSchema);
 export const validateNoteId = zValidator('param', noteIdSchema);

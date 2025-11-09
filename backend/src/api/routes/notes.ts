@@ -1,4 +1,3 @@
-import { Hono } from 'hono';
 import { noteService } from '../../services/note.service';
 import { threadService } from '../../services/thread.service';
 import { deleteService } from '../../services/delete.service';
@@ -8,15 +7,14 @@ import {
   validateNoteId,
   validatePagination,
 } from '../middleware/validation';
-import type {
-  NoteListResponse,
-  NoteDetailResponse,
-} from '@thread-note/shared/types';
+import { requireAuth } from '../../auth/middleware/auth.middleware';
+import type { NoteListResponse, NoteDetailResponse } from '@thread-note/shared/types';
 import { serialize } from '../../types/api';
+import { createApp } from '../../worker';
 
-const app = new Hono()
+const app = createApp()
   // GET /api/notes - List root notes
-  .get('/', validatePagination, async (c) => {
+  .get('/', requireAuth, validatePagination, async (c) => {
     const { limit, offset } = c.req.valid('query');
     const result = await noteService.getRootNotes(limit, offset);
 
@@ -54,7 +52,7 @@ const app = new Hono()
     return c.json(response);
   })
   // PUT /api/notes/:id - Update note
-  .put('/:id', validateNoteId, validateUpdateNote, async (c) => {
+  .put('/:id', requireAuth, validateNoteId, validateUpdateNote, async (c) => {
     const { id } = c.req.valid('param');
     const data = c.req.valid('json');
 
@@ -62,7 +60,7 @@ const app = new Hono()
     return c.json(serialize(updated));
   })
   // DELETE /api/notes/:id - Delete note (cascade)
-  .delete('/:id', validateNoteId, async (c) => {
+  .delete('/:id', requireAuth, validateNoteId, async (c) => {
     const { id } = c.req.valid('param');
     await deleteService.deleteNote(id);
     return c.body(null, 204);

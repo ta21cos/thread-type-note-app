@@ -2,6 +2,8 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotesUIProvider } from './store/notes.store';
 import { AppRouter } from './router';
+import { AuthGuard } from './components/AuthGuard';
+import { useUserSync } from './hooks/useUserSync';
 
 // NOTE: Configure TanStack Query client
 const queryClient = new QueryClient({
@@ -20,10 +22,15 @@ const queryClient = new QueryClient({
 });
 
 const App: React.FC = () => {
+  // NOTE: Auto-sync user on sign-in
+  useUserSync();
+
   return (
     <QueryClientProvider client={queryClient}>
       <NotesUIProvider>
-        <AppRouter />
+        <AuthGuard>
+          <AppRouter />
+        </AuthGuard>
       </NotesUIProvider>
     </QueryClientProvider>
   );

@@ -23,7 +23,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
   onSplitChange,
   className = '',
   showRight = true,
-  onCloseRight,
 }) => {
   const [splitPosition, setSplitPosition] = useState(defaultSplitPosition);
   const [isDragging, setIsDragging] = useState(false);

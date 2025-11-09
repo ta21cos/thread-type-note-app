@@ -1,5 +1,13 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { client } from './api.client';
+import { useApiClient } from '../hooks/useApiClient';
+import type { Note, SearchResponse } from '../../../shared/types';
+
+// NOTE: API response types
+interface NotesListResponse {
+  notes: Note[];
+  total: number;
+  hasMore: boolean;
+}
 
 // NOTE: API response type for optimistic updates
 interface NoteWithThreadResponse {
@@ -45,16 +53,13 @@ export const noteKeys = {
 
 // NOTE: Fetch all root notes
 export const useNotes = () => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.lists(),
     queryFn: async () => {
-      const res = await client.api.notes.$get({
-        query: {},
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      return await res.json();
+      const response = await get<NotesListResponse>('/notes');
+      return response;
     },
     staleTime: 1000 * 60 * 1, // 1 minute
   });
@@ -62,19 +67,16 @@ export const useNotes = () => {
 
 // NOTE: Fetch notes with infinite scroll
 export const useInfiniteNotes = (limit: number = 20) => {
+  const { get } = useApiClient();
+
   return useInfiniteQuery({
     queryKey: [...noteKeys.lists(), { limit }],
     queryFn: async ({ pageParam = 0 }) => {
-      const res = await client.api.notes.$get({
-        query: {
-          offset: pageParam,
-          limit: limit,
-        },
+      const response = await get<NotesListResponse>('/notes', {
+        offset: pageParam,
+        limit,
       });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      return await res.json();
+      return response;
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.hasMore) return undefined;
@@ -87,16 +89,13 @@ export const useInfiniteNotes = (limit: number = 20) => {
 
 // NOTE: Fetch single note with thread
 export const useNote = (id: string | undefined) => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.detail(id!),
     queryFn: async () => {
-      const res = await client.api.notes[':id'].$get({
-        param: { id: id! },
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      return await res.json();
+      const response = await get<NoteWithThreadResponse>(`/notes/${id}`);
+      return response;
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 1,
@@ -105,16 +104,13 @@ export const useNote = (id: string | undefined) => {
 
 // NOTE: Search notes
 export const useSearchNotes = (query: string, type: 'content' | 'mention' = 'content') => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.search(query, type),
     queryFn: async () => {
-      const res = await client.api.notes.search.$get({
-        query: { q: query, type },
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      return await res.json();
+      const response = await get<SearchResponse>('/notes/search', { q: query, type });
+      return response;
     },
     enabled: query.length > 0,
     staleTime: 1000 * 30, // 30 seconds
@@ -123,16 +119,13 @@ export const useSearchNotes = (query: string, type: 'content' | 'mention' = 'con
 
 // NOTE: Get notes that mention a specific note
 export const useNoteMentions = (id: string | undefined) => {
+  const { get } = useApiClient();
+
   return useQuery({
     queryKey: noteKeys.mentions(id!),
     queryFn: async () => {
-      const res = await client.api.notes[':id'].mentions.$get({
-        param: { id: id! },
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      return await res.json();
+      const response = await get<{ mentions: Note[] }>(`/notes/${id}/mentions`);
+      return response;
     },
     enabled: !!id,
     staleTime: 1000 * 60 * 1,
@@ -142,16 +135,12 @@ export const useNoteMentions = (id: string | undefined) => {
 // NOTE: Create new note
 export const useCreateNote = () => {
   const queryClient = useQueryClient();
+  const { post } = useApiClient();
 
   return useMutation({
     mutationFn: async ({ content, parentId }: CreateNoteDto) => {
-      const res = await client.api.notes.$post({
-        json: { content, parentId },
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      return await res.json();
+      const response = await post<Note>('/notes', { content, parentId });
+      return response;
     },
     onSuccess: (newNote) => {
       // NOTE: Refetch notes list immediately to get updated replyCount
@@ -168,17 +157,12 @@ export const useCreateNote = () => {
 // NOTE: Update existing note
 export const useUpdateNote = () => {
   const queryClient = useQueryClient();
+  const { put } = useApiClient();
 
   return useMutation({
     mutationFn: async ({ id, content }: { id: string } & UpdateNoteDto) => {
-      const res = await client.api.notes[':id'].$put({
-        param: { id },
-        json: { content },
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      return await res.json();
+      const response = await put<Note>(`/notes/${id}`, { content });
+      return response;
     },
     onMutate: async ({ id, content }) => {
       // NOTE: Cancel outgoing refetches
@@ -218,15 +202,11 @@ export const useUpdateNote = () => {
 // NOTE: Delete note (with cascade)
 export const useDeleteNote = () => {
   const queryClient = useQueryClient();
+  const { delete: del } = useApiClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await client.api.notes[':id'].$delete({
-        param: { id },
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
+      await del(`/notes/${id}`);
       return id;
     },
     onSuccess: (deletedId) => {

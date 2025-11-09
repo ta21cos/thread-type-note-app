@@ -3,7 +3,7 @@
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "types": ["vite/client", "vitest/globals", "@playwright/test"],
+    "types": ["vite/client", "vitest/globals", "@playwright/test", "@cloudflare/workers-types"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],

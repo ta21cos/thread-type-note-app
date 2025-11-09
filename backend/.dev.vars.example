@@ -1,0 +1,10 @@
+PORT=3000
+NODE_ENV=development
+
+# Clerk Authentication Keys
+# Get these from https://dashboard.clerk.com
+CLERK_SECRET_KEY=sk_test_...
+CLERK_PUBLISHABLE_KEY=pk_test_...
+ALLOWED_ORIGINS=http://localhost:5173
+APP_DOMAIN=localhost:3000
+
