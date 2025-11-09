@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
+import type { MentionsResponse } from '@thread-note/shared/types';
+import { fetchJson } from '../helpers/fetch';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -25,8 +27,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should return list of notes mentioning the specified note', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes/abc123/mentions`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<MentionsResponse>(`${API_BASE_URL}/api/notes/abc123/mentions`);
 
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('mentions');
@@ -34,8 +35,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should include note object and position in each mention', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes/abc123/mentions`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<MentionsResponse>(`${API_BASE_URL}/api/notes/abc123/mentions`);
 
     expect(response.status).toBe(200);
     if (data.mentions.length > 0) {
@@ -46,8 +46,7 @@ describe('GET /api/notes/:id/mentions', () => {
   });
 
   it('should return empty array for note with no mentions', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes/noment/mentions`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<MentionsResponse>(`${API_BASE_URL}/api/notes/noment/mentions`);
 
     expect(response.status).toBe(200);
     expect(data.mentions).toEqual([]);

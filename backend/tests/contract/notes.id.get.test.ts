@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { db, notes } from '../../src/db';
 import { eq } from 'drizzle-orm';
+import type { NoteDetailResponse } from '@thread-note/shared/types';
+import { fetchJson } from '../helpers/fetch';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -21,8 +23,7 @@ describe('GET /api/notes/:id', () => {
   });
 
   it('should return note details with thread', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes/abc123?includeThread=true`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<NoteDetailResponse>(`${API_BASE_URL}/api/notes/abc123?includeThread=true`);
 
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('note');
@@ -31,8 +32,7 @@ describe('GET /api/notes/:id', () => {
   });
 
   it('should return only note without thread when includeThread=false', async () => {
-    const response = await fetch(`${API_BASE_URL}/api/notes/abc123?includeThread=false`);
-    const data = await response.json();
+    const { response, data } = await fetchJson<NoteDetailResponse>(`${API_BASE_URL}/api/notes/abc123?includeThread=false`);
 
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('note');
