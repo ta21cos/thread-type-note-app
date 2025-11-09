@@ -8,12 +8,14 @@ export type Bindings = {
   DB: D1Database;
 };
 
-export const createApp = () => {
-  return new Hono<{ Bindings: Bindings }>();
-};
-
 // NOTE: Create Hono app with D1 binding support
-const worker = createApp();
+const worker = new Hono<{ Bindings: Bindings }>()
+  .use('*', async (c, next) => {
+    const db = initD1Database(c.env.DB);
+    setDb(db);
+    await next();
+  })
+  .route('/', app);
 
 // NOTE: Middleware to initialize D1 database per request
 // In Cloudflare Workers, we initialize DB for each request as Workers can be distributed

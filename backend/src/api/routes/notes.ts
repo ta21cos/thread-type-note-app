@@ -10,9 +10,9 @@ import {
 import { requireAuth } from '../../auth/middleware/auth.middleware';
 import type { NoteListResponse, NoteDetailResponse } from '@thread-note/shared/types';
 import { serialize } from '../../types/api';
-import { createApp } from '../../worker';
+import { Hono } from 'hono';
 
-const app = createApp()
+const app = new Hono()
   // GET /api/notes - List root notes
   .get('/', requireAuth, validatePagination, async (c) => {
     const { limit, offset } = c.req.valid('query');
