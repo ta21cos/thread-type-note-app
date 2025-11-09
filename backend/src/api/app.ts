@@ -4,6 +4,7 @@ import { logger } from 'hono/logger';
 import notesRoutes from './routes/notes';
 import searchRoutes from './routes/search';
 import mentionsRoutes from './routes/mentions';
+import usersRoutes from './routes/users';
 import { errorHandler } from './middleware/error';
 
 // NOTE: Hono app instance and router setup
@@ -17,6 +18,7 @@ app.use('*', cors());
 app.route('/api/notes', searchRoutes);  // /search route
 app.route('/api/notes', mentionsRoutes); // /:id/mentions route
 app.route('/api/notes', notesRoutes);   // /:id route (must be last)
+app.route('/api/users', usersRoutes);   // /sync route
 
 // NOTE: Health check endpoint for monitoring
 app.get('/health', (c) => {
