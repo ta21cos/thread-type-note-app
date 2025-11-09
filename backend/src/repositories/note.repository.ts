@@ -1,5 +1,4 @@
-import { eq, isNull, desc, asc, sql } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/sqlite-core';
+import { eq, isNull, desc, asc } from 'drizzle-orm';
 import { db, notes, type Note, type NewNote, type NoteWithReplyCount } from '../db';
 
 // NOTE: Repository for Note CRUD operations
@@ -15,37 +14,35 @@ export class NoteRepository {
   }
 
   async findRootNotes(limit: number, offset: number): Promise<NoteWithReplyCount[]> {
-    // NOTE: Create alias for child notes to avoid ambiguous column names in self-join
-    const childNotes = alias(notes, 'child_notes');
-
-    const results = await db
-      .select({
-        id: notes.id,
-        content: notes.content,
-        parentId: notes.parentId,
-        createdAt: notes.createdAt,
-        updatedAt: notes.updatedAt,
-        depth: notes.depth,
-        replyCount: sql<number>`COUNT(${childNotes.id})`.mapWith(Number),
-      })
+    // NOTE: Get all root notes
+    const rootNotes = await db
+      .select()
       .from(notes)
-      .leftJoin(childNotes, eq(childNotes.parentId, notes.id))
       .where(isNull(notes.parentId))
-      .groupBy(notes.id)
       .orderBy(desc(notes.createdAt))
       .limit(limit)
       .offset(offset);
 
-    // NOTE: Ensure replyCount is a number
-    return results.map(note => ({
-      ...note,
-      replyCount: Number(note.replyCount) || 0,
-    })) as NoteWithReplyCount[];
+    // NOTE: Get reply counts for each root note
+    const notesWithCounts: NoteWithReplyCount[] = await Promise.all(
+      rootNotes.map(async (note) => {
+        const replies = await db
+          .select()
+          .from(notes)
+          .where(eq(notes.parentId, note.id));
+        return {
+          ...note,
+          replyCount: replies.length,
+        };
+      })
+    );
+
+    return notesWithCounts;
   }
 
   async countRootNotes(): Promise<number> {
     const result = await db
-      .select({ count: notes.id })
+      .select()
       .from(notes)
       .where(isNull(notes.parentId));
     return result.length;

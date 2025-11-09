@@ -12,6 +12,7 @@ import type {
   NoteListResponse,
   NoteDetailResponse,
 } from '@thread-note/shared/types';
+import { serialize } from '../../types/api';
 
 const app = new Hono();
 
@@ -21,7 +22,7 @@ app.get('/', validatePagination, async (c) => {
   const result = await noteService.getRootNotes(limit, offset);
 
   const response: NoteListResponse = {
-    notes: result.notes,
+    notes: result.notes.map(serialize),
     total: result.total,
     hasMore: result.hasMore,
   };
@@ -33,7 +34,7 @@ app.get('/', validatePagination, async (c) => {
 app.post('/', validateCreateNote, async (c) => {
   const data = c.req.valid('json');
   const note = await noteService.createNote(data);
-  return c.json(note, 201);
+  return c.json(serialize(note), 201);
 });
 
 // GET /api/notes/:id - Get note with thread
@@ -46,20 +47,14 @@ app.get('/:id', validateNoteId, async (c) => {
     return c.json({ error: 'Not Found', message: 'Note not found' }, 404);
   }
 
-  const response: NoteDetailResponse = includeThread
-    ? {
-        note,
-        thread: await threadService.getThread(id),
-      }
-    : {
-        note,
-        thread: undefined as unknown, // NOTE: Don't include thread property when not requested
-      };
+  const thread = includeThread ? await threadService.getThread(id) : [];
 
-  // Remove undefined properties
-  if (response.thread === undefined) {
-    delete (response as Record<string, unknown>).thread;
-  }
+  const response: NoteDetailResponse = {
+    note: serialize(note),
+    thread: thread.map(serialize),
+  };
+
+
 
   return c.json(response);
 });
@@ -70,7 +65,7 @@ app.put('/:id', validateNoteId, validateUpdateNote, async (c) => {
   const data = c.req.valid('json');
 
   const updated = await noteService.updateNote(id, data);
-  return c.json(updated);
+  return c.json(serialize(updated));
 });
 
 // DELETE /api/notes/:id - Delete note (cascade)

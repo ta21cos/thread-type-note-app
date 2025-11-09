@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { searchService } from '../../services/search.service';
 import { validateSearch } from '../middleware/validation';
 import type { SearchResponse } from '@thread-note/shared/types';
+import { serialize } from '../../types/api';
 
 const app = new Hono();
 
@@ -17,7 +18,7 @@ app.get('/search', validateSearch, async (c) => {
   }
 
   const response: SearchResponse = {
-    results,
+    results: results.map(serialize),
     total: results.length,
   };
 

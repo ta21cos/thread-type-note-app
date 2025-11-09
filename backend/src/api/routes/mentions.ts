@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { mentionService } from '../../services/mention.service';
 import { validateNoteId } from '../middleware/validation';
 import type { MentionsResponse } from '@thread-note/shared/types';
+import { serialize } from '../../types/api';
 
 const app = new Hono();
 
@@ -20,8 +21,8 @@ app.get('/:id/mentions', validateNoteId, async (c) => {
 
   const response: MentionsResponse = {
     mentions: mentionsWithNotes.map((m) => ({
-      note: m.notes,
-      position: m.mentions,
+      note: serialize(m.notes),
+      position: m.mentions.position,
     })),
   };
 
