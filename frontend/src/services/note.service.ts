@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { api } from './api.client';
+import { useApiClient } from '../hooks/useApiClient';
 import type { Note } from '../../../shared/types';
 
 // NOTE: API response types
@@ -114,10 +115,11 @@ export const useNoteMentions = (id: string | undefined) => {
 // NOTE: Create new note
 export const useCreateNote = () => {
   const queryClient = useQueryClient();
+  const { post } = useApiClient();
 
   return useMutation({
     mutationFn: async ({ content, parentId }: CreateNoteDto) => {
-      const response = await api.post<Note>('/notes', { content, parentId });
+      const response = await post<Note>('/notes', { content, parentId });
       return response;
     },
     onSuccess: (newNote) => {
@@ -135,10 +137,11 @@ export const useCreateNote = () => {
 // NOTE: Update existing note
 export const useUpdateNote = () => {
   const queryClient = useQueryClient();
+  const { put } = useApiClient();
 
   return useMutation({
     mutationFn: async ({ id, content }: { id: string } & UpdateNoteDto) => {
-      const response = await api.put<Note>(`/notes/${id}`, { content });
+      const response = await put<Note>(`/notes/${id}`, { content });
       return response;
     },
     onMutate: async ({ id, content }) => {
@@ -179,10 +182,11 @@ export const useUpdateNote = () => {
 // NOTE: Delete note (with cascade)
 export const useDeleteNote = () => {
   const queryClient = useQueryClient();
+  const { delete: del } = useApiClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/notes/${id}`);
+      await del(`/notes/${id}`);
       return id;
     },
     onSuccess: (deletedId) => {
