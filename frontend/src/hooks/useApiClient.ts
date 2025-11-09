@@ -1,33 +1,94 @@
 import { useAuth } from '@clerk/clerk-react';
-import { apiFetch } from '../services/api.client';
+import { ApiError } from '../services/api.client';
+
+interface FetchOptions extends RequestInit {
+  params?: Record<string, string | number | boolean | undefined>;
+}
+
+function createUrl(base: string, path: string): URL {
+  return new URL([base.replace(/\/+$/, ''), path.replace(/^\/+/, '')].join('/'), base);
+}
 
 export const useApiClient = () => {
   const { getToken } = useAuth();
 
-  const fetchWithAuth = async <T>(
+  const API_BASE_URL = `${import.meta.env.VITE_BACKEND_API_ENDPOINT}/api`;
+
+  // NOTE: Build URL with query parameters
+  const buildUrl = (
+    path: string,
+    params?: Record<string, string | number | boolean | undefined>
+  ): string => {
+    const url = createUrl(API_BASE_URL, path);
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          url.searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    return url.toString();
+  };
+
+  // NOTE: Generic fetch wrapper with authentication
+  const apiFetch = async <T>(
     endpoint: string,
-    options: RequestInit & { params?: Record<string, string | number | boolean | undefined> } = {}
+    { params, ...options }: FetchOptions = {}
   ): Promise<T> => {
     const token = await getToken();
-    return apiFetch<T>(endpoint, { ...options, token });
+    const url = buildUrl(endpoint, params);
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string>),
+    };
+
+    // NOTE: Add Authorization header with Clerk token
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+      headers,
+      ...options,
+    });
+
+    // NOTE: Handle 204 No Content
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new ApiError(
+        data.message || `HTTP ${response.status}: ${response.statusText}`,
+        response.status,
+        data
+      );
+    }
+
+    return data as T;
   };
 
   return {
     get: <T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>) =>
-      fetchWithAuth<T>(endpoint, { method: 'GET', params }),
+      apiFetch<T>(endpoint, { method: 'GET', params }),
 
     post: <T>(endpoint: string, body?: unknown) =>
-      fetchWithAuth<T>(endpoint, {
+      apiFetch<T>(endpoint, {
         method: 'POST',
         body: body ? JSON.stringify(body) : undefined,
       }),
 
     put: <T>(endpoint: string, body?: unknown) =>
-      fetchWithAuth<T>(endpoint, {
+      apiFetch<T>(endpoint, {
         method: 'PUT',
         body: body ? JSON.stringify(body) : undefined,
       }),
 
-    delete: <T>(endpoint: string) => fetchWithAuth<T>(endpoint, { method: 'DELETE' }),
+    delete: <T>(endpoint: string) => apiFetch<T>(endpoint, { method: 'DELETE' }),
   };
 };

@@ -19,3 +19,10 @@ if (!import.meta.env.VITE_BACKEND_API_ENDPOINT) {
 
 // NOTE: Create typed RPC client with backend API endpoint
 export const client = hc<AppType>(import.meta.env.VITE_BACKEND_API_ENDPOINT);
+
+// NOTE: Create authenticated RPC client with token in headers
+export const createAuthenticatedClient = (token: string | null) => {
+  return hc<AppType>(import.meta.env.VITE_BACKEND_API_ENDPOINT, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+};
