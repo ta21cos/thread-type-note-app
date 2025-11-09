@@ -1,5 +1,5 @@
 import { eq, or } from 'drizzle-orm';
-import { db, mentions, notes, type Mention, type NewMention } from '../db';
+import { db, mentions, notes, type Mention, type NewMention, type Note } from '../db';
 
 // NOTE: Repository for Mention operations
 export class MentionRepository {
@@ -25,15 +25,28 @@ export class MentionRepository {
       );
   }
 
-  async getMentionsWithNotes(toNoteId: string) {
-    return db
-      .select({
-        mention: mentions,
-        note: notes,
-      })
+  async getMentionsWithNotes(toNoteId: string): Promise<Array<{ mentions: Mention; notes: Note }>> {
+    // NOTE: Get all mentions for this note
+    const allMentions = await db
+      .select()
       .from(mentions)
-      .innerJoin(notes, eq(mentions.fromNoteId, notes.id))
       .where(eq(mentions.toNoteId, toNoteId));
+
+    // NOTE: Fetch the notes for each mention
+    const results = await Promise.all(
+      allMentions.map(async (mention) => {
+        const [note] = await db
+          .select()
+          .from(notes)
+          .where(eq(notes.id, mention.fromNoteId));
+        return {
+          mentions: mention,
+          notes: note,
+        };
+      })
+    );
+
+    return results;
   }
 
   async getAllMentions(): Promise<Map<string, string[]>> {

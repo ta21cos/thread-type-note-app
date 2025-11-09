@@ -9,15 +9,26 @@ interface NotesListResponse {
   hasMore: boolean;
 }
 
+// NOTE: API response type for optimistic updates
 interface NoteWithThreadResponse {
-  note: Note;
-  thread: Note[];
-  depth: number;
-}
-
-interface SearchResponse {
-  results: Note[];
-  total: number;
+  note: {
+    id: string;
+    content: string;
+    parentId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    depth: number;
+    replyCount?: number;
+  };
+  thread: Array<{
+    id: string;
+    content: string;
+    parentId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    depth: number;
+    replyCount?: number;
+  }>;
 }
 
 interface CreateNoteDto {
