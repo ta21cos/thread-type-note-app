@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useApiClient } from '../hooks/useApiClient';
-import type { Note } from '../../../shared/types';
+import type { Note, SearchResponse } from '../../../shared/types';
 
 // NOTE: API response types
 interface NotesListResponse {

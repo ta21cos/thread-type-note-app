@@ -1,33 +1,26 @@
 import { Hono } from 'hono';
 import app from './api/app';
 import { initD1Database } from './db/d1';
-import { setDb, type Database } from './db';
+import { setDb } from './db';
 
 // NOTE: Cloudflare Workers environment bindings
 export type Bindings = {
   DB: D1Database;
-  NODE_ENV?: string;
-
-  CLERK_SECRET_KEY: string;
-  CLERK_PUBLISHABLE_KEY: string;
-  ALLOWED_ORIGINS: string;
-  APP_DOMAIN: string;
 };
 
-export type Variables = {
-  userId?: string;
-  sessionId?: string;
+export const createApp = () => {
+  return new Hono<{ Bindings: Bindings }>();
 };
 
 // NOTE: Create Hono app with D1 binding support
-const worker = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+const worker = createApp();
 
 // NOTE: Middleware to initialize D1 database per request
 // In Cloudflare Workers, we initialize DB for each request as Workers can be distributed
 worker.use('*', async (c, next) => {
   // NOTE: Initialize D1 database with binding from Workers environment
-  const db = initD1Database(c.env.DB as D1Database);
-  setDb(db as Database);
+  const db = initD1Database(c.env.DB);
+  setDb(db);
 
   await next();
 });

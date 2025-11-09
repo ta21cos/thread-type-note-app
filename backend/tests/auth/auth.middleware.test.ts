@@ -18,13 +18,18 @@ vi.mock('../../src/auth/clerk', () => ({
   getClerkClient: () => mockClerkClient,
 }));
 
-import { requireAuth, optionalAuth } from '../../src/auth/middleware/auth.middleware';
+import { requireAuth } from '../../src/auth/middleware/auth.middleware';
+
+type Variables = {
+  userId?: string;
+  sessionId?: string;
+};
 
 describe('Authentication Middleware', () => {
-  let app: Hono;
+  let app: Hono<{ Variables: Variables }>;
 
   beforeEach(() => {
-    app = new Hono();
+    app = new Hono<{ Variables: Variables }>();
     vi.clearAllMocks();
   });
 
@@ -85,46 +90,6 @@ describe('Authentication Middleware', () => {
       expect(res.status).toBe(401);
       const body = await res.json();
       expect(body).toEqual({ error: 'Invalid session' });
-    });
-  });
-
-  describe('optionalAuth', () => {
-    it('should continue without auth when not authenticated', async () => {
-      mockAuthenticateRequest.mockResolvedValue({
-        isAuthenticated: false,
-        toAuth: () => ({ userId: null, sessionId: null }),
-      });
-
-      let capturedUserId: string | undefined;
-
-      app.get('/public', optionalAuth, (c) => {
-        capturedUserId = c.get('userId');
-        return c.json({ data: 'public' });
-      });
-
-      const res = await app.request('/public');
-
-      expect(res.status).toBe(200);
-      expect(capturedUserId).toBeUndefined();
-    });
-
-    it('should set userId when authenticated', async () => {
-      mockAuthenticateRequest.mockResolvedValue({
-        isAuthenticated: true,
-        toAuth: () => ({ userId: 'user_789', sessionId: 'sess_101' }),
-      });
-
-      let capturedUserId: string | undefined;
-
-      app.get('/public', optionalAuth, (c) => {
-        capturedUserId = c.get('userId');
-        return c.json({ data: 'public' });
-      });
-
-      const res = await app.request('/public');
-
-      expect(res.status).toBe(200);
-      expect(capturedUserId).toBe('user_789');
     });
   });
 });

@@ -1,11 +1,26 @@
 import { getClerkClient } from '../clerk';
 import type { MiddlewareHandler } from 'hono';
-import type { Bindings, Variables } from '../../worker';
 
-export const requireAuth: MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> = async (
-  c,
-  next
-) => {
+import { createMiddleware } from 'hono/factory';
+import { Bindings, Variables } from 'hono/types';
+
+type AuthBindings = {
+  CLERK_SECRET_KEY: string;
+  CLERK_PUBLISHABLE_KEY: string;
+  ALLOWED_ORIGINS: string;
+  APP_DOMAIN: string;
+};
+
+export type AuthVariables = {
+  userId: string;
+  sessionId: string;
+};
+
+// NOTE: Generic middleware that works with any Hono environment
+export const requireAuth = createMiddleware<{
+  Bindings: Bindings & AuthBindings;
+  Variables: Variables & AuthVariables;
+}>(async (c, next) => {
   const CLERK_SECRET_KEY = c.env.CLERK_SECRET_KEY;
   const CLERK_PUBLISHABLE_KEY = c.env.CLERK_PUBLISHABLE_KEY;
   const ALLOWED_ORIGINS = c.env.ALLOWED_ORIGINS;
@@ -48,31 +63,4 @@ export const requireAuth: MiddlewareHandler<{ Bindings: Bindings; Variables: Var
   c.set('sessionId', auth.sessionId);
 
   await next();
-};
-
-export const optionalAuth: MiddlewareHandler = async (c, next) => {
-  const env = c.env as any;
-  const clerkClient = getClerkClient({
-    CLERK_SECRET_KEY: env?.CLERK_SECRET_KEY || process.env.CLERK_SECRET_KEY,
-    CLERK_PUBLISHABLE_KEY: env?.CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY,
-  });
-
-  const allowedOrigins = env?.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS;
-  const appDomain = env?.APP_DOMAIN || process.env.APP_DOMAIN;
-
-  const { isAuthenticated, toAuth } = await clerkClient.authenticateRequest(c.req.raw, {
-    authorizedParties: allowedOrigins?.split(',') || [],
-    audience: appDomain,
-    clockSkewInMs: 5000,
-  });
-
-  if (isAuthenticated) {
-    const auth = toAuth();
-    if (auth.userId) {
-      c.set('userId', auth.userId);
-      c.set('sessionId', auth.sessionId);
-    }
-  }
-
-  await next();
-};
+});

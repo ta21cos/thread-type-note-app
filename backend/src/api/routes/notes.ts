@@ -1,4 +1,3 @@
-import { Hono } from 'hono';
 import { noteService } from '../../services/note.service';
 import { threadService } from '../../services/thread.service';
 import { deleteService } from '../../services/delete.service';
@@ -9,13 +8,11 @@ import {
   validatePagination,
 } from '../middleware/validation';
 import { requireAuth } from '../../auth/middleware/auth.middleware';
-import type {
-  NoteListResponse,
-  NoteDetailResponse,
-} from '@thread-note/shared/types';
+import type { NoteListResponse, NoteDetailResponse } from '@thread-note/shared/types';
 import { serialize } from '../../types/api';
+import { createApp } from '../../worker';
 
-const app = new Hono()
+const app = createApp()
   // GET /api/notes - List root notes
   .get('/', requireAuth, validatePagination, async (c) => {
     const { limit, offset } = c.req.valid('query');
@@ -30,13 +27,13 @@ const app = new Hono()
     return c.json(response);
   })
   // POST /api/notes - Create note
-  .post('/', requireAuth, validateCreateNote, async (c) => {
+  .post('/', validateCreateNote, async (c) => {
     const data = c.req.valid('json');
     const note = await noteService.createNote(data);
     return c.json(serialize(note), 201);
   })
   // GET /api/notes/:id - Get note with thread
-  .get('/:id', requireAuth, validateNoteId, async (c) => {
+  .get('/:id', validateNoteId, async (c) => {
     const { id } = c.req.valid('param');
     const includeThread = c.req.query('includeThread') !== 'false';
 
