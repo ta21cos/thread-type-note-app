@@ -1,5 +1,4 @@
 import { getClerkClient } from '../clerk';
-import type { MiddlewareHandler } from 'hono';
 
 import { createMiddleware } from 'hono/factory';
 import { Bindings, Variables } from 'hono/types';
