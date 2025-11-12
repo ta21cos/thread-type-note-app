@@ -5,6 +5,7 @@
   "workspaces": [
     "backend",
     "frontend",
+    "desktop",
     "shared"
   ],
   "scripts": {
@@ -18,6 +19,9 @@
     "db:setup:test": "bun run --filter @thread-note/backend db:setup:test",
     "db:migrate": "bun run --filter @thread-note/backend db:migrate",
     "db:seed": "bun run --filter @thread-note/backend db:seed",
+    "desktop:dev": "bun run --filter @thread-note/desktop dev",
+    "desktop:build": "bun run --filter @thread-note/desktop build",
+    "desktop:package": "bun run --filter @thread-note/desktop package:mac",
     "release:staging": "bun run --filter @thread-note/frontend deploy:staging && bun run --filter @thread-note/backend db:migrate:staging && bun run --filter @thread-note/backend deploy:staging",
     "release:production": "bun run --filter @thread-note/frontend deploy:production && bun run --filter @thread-note/backend db:migrate:production && bun run --filter @thread-note/backend deploy:production",
     "lint": "bun run --filter '*' lint",
