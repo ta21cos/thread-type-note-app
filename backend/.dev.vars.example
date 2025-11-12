@@ -1,6 +1,9 @@
 PORT=3000
 NODE_ENV=development
 
+# For local sqlite database
+# DATABASE_URL=data/notes.db
+
 # Clerk Authentication Keys
 # Get these from https://dashboard.clerk.com
 CLERK_SECRET_KEY=sk_test_...
