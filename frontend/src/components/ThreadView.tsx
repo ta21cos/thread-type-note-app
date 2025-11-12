@@ -437,11 +437,11 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
         <div className="flex items-end gap-2">
           <div className="flex-1 rounded-lg border border-input bg-card">
             <Input
-              placeholder="Reply..."
+              placeholder="Reply... (Cmd/Ctrl+Enter to send)"
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
                   handleReply();
                 }
