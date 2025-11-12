@@ -36,6 +36,13 @@ frontend/
 │   └── services/     # API clients
 └── tests/
 
+desktop/
+├── src/
+│   ├── main/        # Electron main process
+│   ├── preload/     # Preload scripts
+│   └── renderer/    # Fallback renderer HTML
+└── electron.vite.config.ts
+
 shared/
 ├── types/           # TypeScript interfaces
 └── constants/       # Shared constants
@@ -69,6 +76,11 @@ The application uses environment-specific configuration files:
 bun install          # Install dependencies
 bun run dev          # Start development server
 bun run build        # Build for production
+
+# Desktop App
+bun run desktop:dev      # Start Electron desktop app (loads http://localhost:5173)
+bun run desktop:build    # Build desktop app
+bun run desktop:package  # Package desktop app for macOS
 
 # Testing
 bun test            # Run unit tests with Vitest (uses test database)
