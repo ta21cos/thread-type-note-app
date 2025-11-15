@@ -72,7 +72,7 @@ jobs:
           cd backend && DATABASE_URL=../data/test.db bun run db:migrate
 
       - name: Run unit tests
-        run: bun test
+        run: bun run test
         env:
           NODE_ENV: test
 
