@@ -54,6 +54,9 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,21 +67,18 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        working-directory: backend
         run: bun install --frozen-lockfile
 
       - name: Setup test database
-        working-directory: backend
         run: |
-          mkdir -p data
-          DATABASE_URL=data/test.db bun run db:migrate
+          mkdir -p ../data
+          DATABASE_URL=../data/test.db bun run db:migrate
 
       - name: Run unit tests
-        working-directory: backend
         run: bun test
         env:
           NODE_ENV: test
-          DATABASE_URL: data/test.db
+          DATABASE_URL: ../data/test.db
 
   # Summary job - required for branch protection
   test-summary:
