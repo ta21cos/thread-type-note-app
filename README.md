@@ -7,7 +7,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-Runtime-black.svg)](https://bun.sh/)
 [![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Tech Stack](#-tech-stack) • [Development](#-development) • [Testing](#-testing)
 
@@ -37,10 +36,6 @@
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/thread.git
-cd thread
-
 # Install dependencies
 bun install
 
@@ -236,10 +231,6 @@ bun test
 git commit -m "feat: add dark mode support"
 git push origin 001-add-dark-mode
 ```
-
-## 📝 License
-
-MIT License - see [LICENSE](LICENSE) file for details
 
 ## 🙏 Acknowledgments
 
