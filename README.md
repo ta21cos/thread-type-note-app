@@ -182,6 +182,7 @@ bun run test:load
 ```
 
 **Testing Philosophy:**
+
 - ✅ Test-Driven Development (TDD)
 - ✅ >80% code coverage target
 - ✅ Mock external dependencies
@@ -189,15 +190,15 @@ bun run test:load
 
 ## 📡 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/notes` | List root notes |
-| `POST` | `/api/notes` | Create new note |
-| `GET` | `/api/notes/:id` | Get note with thread |
-| `PUT` | `/api/notes/:id` | Update note |
-| `DELETE` | `/api/notes/:id` | Delete note (cascade) |
-| `GET` | `/api/notes/search` | Search notes |
-| `GET` | `/api/notes/:id/mentions` | Get note mentions |
+| Method   | Endpoint                  | Description           |
+| -------- | ------------------------- | --------------------- |
+| `GET`    | `/api/notes`              | List root notes       |
+| `POST`   | `/api/notes`              | Create new note       |
+| `GET`    | `/api/notes/:id`          | Get note with thread  |
+| `PUT`    | `/api/notes/:id`          | Update note           |
+| `DELETE` | `/api/notes/:id`          | Delete note (cascade) |
+| `GET`    | `/api/notes/search`       | Search notes          |
+| `GET`    | `/api/notes/:id/mentions` | Get note mentions     |
 
 ## 🎯 Performance Targets
 

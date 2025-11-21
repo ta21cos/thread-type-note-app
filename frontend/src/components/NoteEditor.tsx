@@ -3,6 +3,7 @@ import { Note } from '../../../shared/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { useFocus } from '@/store/focus.context';
 
 interface NoteEditorProps {
   initialContent?: string;
@@ -32,12 +33,32 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const { registerInput, unregisterInput } = useFocus();
 
+  // NOTE: Register input with FocusContext
+  useEffect(() => {
+    registerInput('note-editor', textareaRef);
+    return () => {
+      unregisterInput('note-editor');
+    };
+  }, [registerInput, unregisterInput]);
+
+  // NOTE: Smart auto-focus - focus when editing or creating new note
   useEffect(() => {
     if (autoFocus && textareaRef.current) {
-      textareaRef.current.focus();
+      // NOTE: Small delay to ensure DOM is ready
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          // NOTE: Position cursor at end when editing existing content
+          if (initialContent) {
+            const length = textareaRef.current.value.length;
+            textareaRef.current.setSelectionRange(length, length);
+          }
+        }
+      }, 0);
     }
-  }, [autoFocus]);
+  }, [autoFocus, initialContent]);
 
   const handleContentChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -84,6 +105,13 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       await onSubmit(content.trim());
       setContent('');
       setError(null);
+
+      // NOTE: Smart auto-focus - re-focus for next note if creating (not editing)
+      if (!onCancel && textareaRef.current) {
+        setTimeout(() => {
+          textareaRef.current?.focus();
+        }, 0);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save note');
     } finally {

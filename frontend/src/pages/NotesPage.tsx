@@ -11,11 +11,13 @@ import {
   useDeleteNote,
 } from '../services/note.service';
 import { useNotesUI } from '../store/notes.store';
+import { useFocus } from '../store/focus.context';
 
 export const NotesPage: React.FC = () => {
   const { noteId } = useParams<{ noteId?: string }>();
   const navigate = useNavigate();
   const { selectedNoteId, setSelectedNoteId, replyingToNoteId, stopReply } = useNotesUI();
+  const { focusInput } = useFocus();
 
   // NOTE: Fetch notes with infinite scroll
   const {
@@ -54,6 +56,11 @@ export const NotesPage: React.FC = () => {
   const handleCloseThread = () => {
     setSelectedNoteId(null);
     navigate('/');
+
+    // NOTE: Focus message input when thread closes
+    setTimeout(() => {
+      focusInput('note-editor');
+    }, 100);
   };
 
   // NOTE: Create new note or reply

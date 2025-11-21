@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFocus } from '@/store/focus.context';
 import {
   X,
   Send,
@@ -12,7 +13,6 @@ import {
   Edit,
   Pin,
   ArrowLeft,
-  Smile,
 } from 'lucide-react';
 import { Note } from '../../../shared/types';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,27 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
   const [replyContent, setReplyContent] = useState('');
   const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
   const isMobile = !useMediaQuery('(min-width: 1024px)');
+  const replyInputRef = useRef<HTMLInputElement>(null);
+  const { registerInput, unregisterInput } = useFocus();
+
+  // NOTE: Register reply input with FocusContext
+  useEffect(() => {
+    registerInput('thread-reply', replyInputRef);
+    return () => {
+      unregisterInput('thread-reply');
+    };
+  }, [registerInput, unregisterInput]);
+
+  // NOTE: Smart auto-focus - focus reply input when thread opens (with delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (replyInputRef.current) {
+        replyInputRef.current.focus();
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [rootNote.id]);
 
   const copyLink = (noteId: string) => {
     navigator.clipboard.writeText(`${window.location.origin}/notes/${noteId}`);
@@ -68,6 +89,11 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
     if (!replyContent.trim()) return;
     await onReply(rootNote.id, replyContent);
     setReplyContent('');
+
+    // NOTE: Smart auto-focus - re-focus for next reply
+    setTimeout(() => {
+      replyInputRef.current?.focus();
+    }, 0);
   };
 
   const handleEdit = async (noteId: string, content: string) => {
@@ -441,6 +467,7 @@ export const ThreadView: React.FC<ThreadViewProps> = ({
         <div className="flex items-end gap-2">
           <div className="flex-1 rounded-lg border border-input bg-card">
             <Input
+              ref={replyInputRef}
               placeholder="Reply... (Cmd/Ctrl+Enter to send)"
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}

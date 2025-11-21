@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useFocus } from '@/store/focus.context';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -21,6 +22,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const { registerInput, unregisterInput } = useFocus();
+
+  // NOTE: Register input with FocusContext
+  useEffect(() => {
+    registerInput('search-bar', inputRef);
+    return () => {
+      unregisterInput('search-bar');
+    };
+  }, [registerInput, unregisterInput]);
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
